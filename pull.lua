@@ -7,8 +7,6 @@ local pullQueue = {}
 gui.campQueue = {}
 local aggroQueue = {}  -- New queue to track mobs on their way to camp
 
-local pullability = "220"   --Distant Strike
-
 local messagePrintedFlags = {
     CLR = false,
     DRU = false,
@@ -210,7 +208,8 @@ local function pullTarget()
             local attempts = 0
             while attempts < 3 do
                 if mq.TLO.Target() and not mq.TLO.Navigation.Active() and mq.TLO.Target.LineOfSight() then
-                    mq.cmd("/alt act %s", pullability)
+                    local pullability = "220"   -- Distant Strike
+                    mq.cmdf("/alt act %s", pullability)
                     mq.delay(200)
 
                     -- Check if aggro was gained
