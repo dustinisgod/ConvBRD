@@ -344,8 +344,9 @@ local shownMessage = false  -- Flag to track if the message has been shown
 local function checkHealthAndBuff()
     local hasRezSickness = mq.TLO.Me.Buff(13087)()
     local healthPct = mq.TLO.Me.PctHPs()
+    local rooted = mq.TLO.Me.Rooted()
 
-    if not shownMessage and (hasRezSickness or healthPct < 70) then
+    if not shownMessage and (hasRezSickness or healthPct < 70 or rooted) then
         print("Cannot pull: Either rez sickness is present or health is below 70%.")
         shownMessage = true  -- Set the flag to avoid repeating the message
     elseif shownMessage and healthPct >= 70 then
@@ -358,13 +359,12 @@ local function pullRoutine()
     checkHealthAndBuff()
 
     if gui.botOn and gui.pullOn then
-
         -- Check if pullPause is enabled and timer has exceeded pullPauseTimer minutes
         if gui.pullPause and os.difftime(os.time(), pullPauseTimer) >= (gui.pullPauseTimer * 60) then
             -- Ensure player is in camp
             if utils.isInCamp() then
                 print("Pull routine paused for " .. gui.pullPauseDuration .. " minutes.")
-                
+
                 -- Pause timer by waiting the pullPauseDuration
                 mq.delay(gui.pullPauseDuration * 60 * 1000) -- Convert minutes to milliseconds
 
@@ -387,9 +387,16 @@ local function pullRoutine()
         -- Ensure gui.keepMobsInCampAmount is set and has a sensible value
         local targetCampAmount = gui.keepMobsInCampAmount or 1
 
-        -- Continue pulling until campQueue has the desired number of mobs
-        while #gui.campQueue < targetCampAmount and #aggroQueue == 0 do
+        -- Determine the pull condition based on gui.keepMobsInCamp
+        local pullCondition
+        if gui.keepMobsInCamp then
+            pullCondition = function() return #gui.campQueue < targetCampAmount and #aggroQueue == 0 end
+        else
+            pullCondition = function() return #gui.campQueue == 0 and #aggroQueue == 0 end
+        end
 
+        -- Pull loop with dynamic pull condition
+        while pullCondition() do
             -- Check group member health and mana status before each pull
             local groupStatusOk = checkGroupMemberStatus()
             if not groupStatusOk then
