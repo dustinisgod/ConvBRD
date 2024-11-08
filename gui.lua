@@ -119,7 +119,7 @@ local function controlGUI()
         mq.exit()
     end
 
-    ImGui.SetWindowSize(440, 800)
+    ImGui.SetWindowSize(440, 600)
 
     gui.botOn = ImGui.Checkbox("Bot On", gui.botOn or false)
 
