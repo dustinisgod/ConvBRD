@@ -338,15 +338,24 @@ local function checkGroupMemberStatus()
     return true
 end
 
-local function pullRoutine()
-    -- Check if player has buff ID 13087 or health is below 70%
+local shownMessage = false  -- Flag to track if the message has been shown
+
+-- Main check function to run periodically
+local function checkHealthAndBuff()
     local hasRezSickness = mq.TLO.Me.Buff(13087)()
     local healthPct = mq.TLO.Me.PctHPs()
 
-    if hasRezSickness or healthPct < 70 then
+    if not shownMessage and (hasRezSickness or healthPct < 70) then
         print("Cannot pull: Either rez sickness is present or health is below 70%.")
-        return
+        shownMessage = true  -- Set the flag to avoid repeating the message
+    elseif shownMessage and healthPct >= 70 then
+        -- Reset the flag when health is back above 70%
+        shownMessage = false
     end
+end
+
+local function pullRoutine()
+    checkHealthAndBuff()
 
     if gui.botOn and gui.pullOn then
 

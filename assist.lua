@@ -13,8 +13,6 @@ function assist.assistRoutine()
         return
     end
 
-    print("Assist routine started.")
-    
     -- Use reference location to find mobs within assist range
     local mobsInRange = utils.referenceLocation(gui.assistRange) or {}
     if #mobsInRange == 0 then

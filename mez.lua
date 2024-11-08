@@ -12,7 +12,6 @@ function mez.mezRoutine()
         return
     end
 
-    print("Mez routine started.")
     -- Find the best mez spell for the character's level
     local bestMezSpell = spells.findBestSpell("Mez", charLevel)
     if not bestMezSpell then
