@@ -12,21 +12,68 @@ local function setExit()
     gui.isOpen = false
 end
 
-local function setBotOnOff(value)
-    if value == "" then
-        print("Usage: /convbard Bot on/off")
-    elseif value == 'on' then
-        gui.botOn = true
-        print("Bot is now enabled")
-    elseif value == 'off' then
-        gui.botOn = false
-        print("Bot is now disabled")
-    end
-end
-
 local function setSave()
     gui.saveConfig()
 end
+
+-- Helper function for on/off commands
+local function setToggleOption(option, value, name)
+    if value == "on" then
+        gui[option] = true
+        print(name .. " is now enabled.")
+    elseif value == "off" then
+        gui[option] = false
+        print(name .. " is now disabled.")
+    else
+        print("Usage: /convBRD " .. name .. " on/off")
+    end
+end
+
+-- Helper function for numeric value commands
+local function setNumericOption(option, value, name)
+    if value == "" then
+        print("Usage: /convBRD " .. name .. " <number>")
+        return
+    end
+    if not string.match(value, "^%d+$") then
+        print("Error: " .. name .. " must be a number with no letters or symbols.")
+        return
+    end
+    gui[option] = tonumber(value)
+    print(name .. " set to", gui[option])
+end
+
+-- On/Off Commands
+local function setBotOnOff(value) setToggleOption("botOn", value, "Bot") end
+local function setKeepMobsInCamp(value) setToggleOption("keepMobsInCamp", value, "Keep Mobs In Camp") end
+local function setSwitchWithMA(value) setToggleOption("switchWithMA", value, "Switch with MA") end
+local function setPullOnOff(value)
+    if value == "on" then
+        gui.pullOn = true
+        gui.chase = false
+        gui.returnToCamp = true
+        print("Pulling is now enabled.")
+    elseif value == "off" then
+        gui.pullOn = false
+        print("Pulling is now disabled.")
+    else
+        print("Usage: /convBRD Pull on/off")
+    end
+end
+local function setPullPause(value) setToggleOption("pullPause", value, "Pull Pause") end
+
+-- Numeric Commands
+local function setMezRadius(value) setNumericOption("mezRadius", value, "MezRadius") end
+local function setMezStopPercent(value) setNumericOption("mezStopPercent", value, "MezStopPct") end
+local function setMezAmount(value) setNumericOption("mezAmount", value, "MezAmount") end
+local function setPullAmount(value) setNumericOption("pullAmount", value, "PullAmount") end
+local function setPullDistance(value) setNumericOption("pullDistance", value, "PullDistance") end
+local function setPullLevelMin(value) setNumericOption("pullLevelMin", value, "PullLevelMin") end
+local function setPullLevelMax(value) setNumericOption("pullLevelMax", value, "PullLevelMax") end
+local function setPullPauseTimer(value) setNumericOption("pullPauseTimer", value, "PullPauseTimer") end
+local function setPullPauseDuration(value) setNumericOption("pullPauseDuration", value, "PullPauseDuration") end
+local function setKeepMobsInCampAmount(value) setNumericOption("keepMobsInCampAmount", value, "KeepMobsInCampAmount") end
+
 
 -- Combined function for setting main assist, range, and percent
 local function setAssist(name, range, percent)
@@ -69,7 +116,7 @@ end
 
 local function setChaseOnOff(value)
     if value == "" then
-        print("Usage: /convbard Chase <targetName> <distance> or /convbard Chase off/on")
+        print("Usage: /convBRD Chase <targetName> <distance> or /convBRD Chase off/on")
     elseif value == 'on' then
         gui.chaseOn = true
         gui.returnToCamp = false
@@ -83,7 +130,7 @@ local function setChaseOnOff(value)
         local targetName, distanceStr = value:match("^(%S+)%s*(%S*)$")
         
         if not targetName then
-            print("Invalid input. Usage: /convbard Chase <targetName> <distance>")
+            print("Invalid input. Usage: /convBRD Chase <targetName> <distance>")
             return
         end
         
@@ -92,7 +139,7 @@ local function setChaseOnOff(value)
         
         -- Check if distance is valid
         if not distance then
-            print("Invalid distance provided. Usage: /ConvBard Chase <targetName> <distance> or /ConvBard Chase off")
+            print("Invalid distance provided. Usage: /convBRD Chase <targetName> <distance> or /convBRD Chase off")
             return
         end
         
@@ -120,149 +167,7 @@ local function setCampHere(value1)
         gui.campDistance = tonumber(value1)
         print("Camp location set with distance:", gui.campDistance)
     else
-        print("Error: Invalid command. Usage: /convbard camphere <distance>, /convbard camphere on, /convbard camphere off")
-    end
-end
-
-local function setMezRadius(value)
-    if value == "" then
-        print("Usage: /convbard MezRadius <Radius>")
-        return
-    end
-    if not string.match(value, "^%d+$") then
-        print("Error: Mesmerize Radius must be a number with no letters or symbols.")
-        return
-    end
-    gui.mezRadius = tonumber(value) or gui.mezRadius
-    print("Mesmerize Radius set to ", gui.mezRadius)
-end
-
-local function setMezStopPercent(value)
-    if value == "" then
-        print("Usage: /convbard MezStopPct <Percent>")
-        return
-    end
-    if not string.match(value, "^%d+$") then
-        print("Error: Mesmerize Stop Percent must be a number with no letters or symbols.")
-        return
-    end
-    gui.mezStopPercent = tonumber(value) or gui.mezStopPercent
-    print("Mesmerize Stop Percent set to", gui.mezStopPercent)
-end
-
-local function setMezAmount(value)
-    if value == "" then
-        print("Usage: /convbard mezAmount <amount>")
-        return
-    end
-    if not string.match(value, "^%d+$") then
-        print("Error: Mez amount must be a number with no letters or symbols.")
-        return
-    end
-    gui.mezAmount = tonumber(value) or gui.mezAmount
-    print("Mez Amount set to", gui.mezAmount)
-end
-
-local function setPullAmount(value)
-    if value == "" then
-        print("Usage: /convbard pullamount <amount>")
-        return
-    end
-    if not string.match(value, "^%d+$") then
-        print("Error: Pull amount must be a number with no letters or symbols.")
-        return
-    end
-    gui.pullAmount = tonumber(value) or gui.pullAmount
-        print("Pull Amount set to", gui.pullAmount)
-end
-
-local function setPullDistance(value)
-    if value == "" then
-        print("Usage: /convbard PullDistance <distance>")
-        return
-    end
-    if not string.match(value, "^%d+$") then
-        print("Error: Camp distance must be a number with no letters or symbols.")
-        return
-    end
-    gui.pullDistance = tonumber(value) or gui.pullDistance
-    print("Pull Distance set to", gui.pullDistance)
-end
-
-local function setPullLevelMin(value)
-    if value == "" then
-        print("Usage: /convbard pullLevelMin <level>")
-        return
-    end
-    if not string.match(value, "^%d+$") then
-        print("Error: Pull level min must be a number with no letters or symbols.")
-        return
-    end
-    gui.pullLevelMin = tonumber(value) or gui.pullLevelMin
-    print("Pull Level Min set to", gui.pullLevelMin)
-end
-
-local function setPullLevelMax(value)
-    if value == "" then
-        print("Usage: /convbard pullLevelMax <level>")
-        return
-    end
-    if not string.match(value, "^%d+$") then
-        print("Error: Pull level max must be a number with no letters or symbols.")
-        return
-    end
-    gui.pullLevelMax = tonumber(value) or gui.pullLevelMax
-    print("Pull Level Max set to", gui.pullLevelMax)
-end
-
-local function setPullPauseTimer(value)
-    if value == "" then
-        print("Usage: /convbard pullPauseTimer <timer>")
-        return
-    end
-    if not string.match(value, "^%d+$") then
-        print("Error: Pull Pause Timer must be a number with no letters or symbols.")
-        return
-    end
-    gui.pullPauseTimer = tonumber(value) or gui.pullPauseTimer
-    print("Pull Pause Timer set to", gui.pullPauseTimer)
-end
-
-local function setPullPauseDuration(value)
-    if value == "" then
-        print("Usage: /convbard pullPauseDuration <duration>")
-        return
-    end
-    if not string.match(value, "^%d+$") then
-        print("Error: Pull Pause Duration must be a number with no letters or symbols.")
-        return
-    end
-    gui.pullPauseDuration = tonumber(value) or gui.pullPauseDuration
-    print("Pull Pause Duration set to", gui.pullPauseDuration)
-end
-
-local function setKeepMobsInCampAmount(value)
-    if value == "" then
-        print("Usage: /convbard KeepMobsInCampAmount <amount>")
-        return
-    end
-    if not string.match(value, "^%d+$") then
-        print("Error: Keep Mobs In Camp Amount must be a number with no letters or symbols.")
-        return
-    end
-    gui.keepMobsInCampAmount = tonumber(value) or gui.keepMobsInCampAmount
-    print("Keep Mobs In Camp Amount set to", gui.keepMobsInCampAmount)
-end
-
-local function setKeepMobsInCamp(value)
-    if value == "" then
-        print("Usage: /convbard KeepMobsInCamp on/off")
-    elseif value == 'on' then
-        gui.keepMobsInCamp = true
-        print("Keep Mobs In Camp is now enabled")
-    elseif value == 'off' then
-        gui.keepMobsInCamp = false
-        print("Keep Mobs In Camp is now disabled")
+        print("Error: Invalid command. Usage: /convBRD camphere <distance>, /convBRD camphere on, /convBRD camphere off")
     end
 end
 
@@ -292,10 +197,10 @@ local function setMeleeOptions(meleeOption, stickOption, stickDistance)
             gui.stickDistance = tonumber(stickOption)
             print("Stick distance set to", gui.stickDistance)
         elseif stickOption then
-            print("Invalid stick distance. Usage: /convbard melee front/behind <distance>")
+            print("Invalid stick distance. Usage: /convBRD melee front/behind <distance>")
         end
     else
-        print("Error: Invalid command. Usage: /convbard melee on/off or /convbard melee front/behind <distance>")
+        print("Error: Invalid command. Usage: /convBRD melee on/off or /convBRD melee front/behind <distance>")
     end
 end
 
@@ -349,49 +254,10 @@ local function setSingOptions(option, value)
             gui[songKey] = false
             print(option:gsub("^%l", string.upper) .. " is now disabled")
         else
-            print("Error: Value must be 'on' or 'off'. Usage: /convbard singsong <songname> on/off")
+            print("Error: Value must be 'on' or 'off'. Usage: /convBRD singsong <songname> on/off")
         end
     else
-        print("Error: Invalid song name or command. Usage: /convbard singsong on/off or /convbard singsong <songname> on/off")
-    end
-end
-
-
-local function setSwitchWithMA(value)
-    if value == "" then
-        print("Usage: /convbard switchwithma on/off")
-    elseif value == 'on' then
-        gui.switchWithMA = true
-        print("Switch with MA is now enabled")
-    elseif value == 'off' then
-        gui.switchWithMA = false
-        print("Switch with MA is now disabled")
-    end
-end
-
-local function setPullOnOff(value)
-    if value == "" then
-        print("Usage: /convbard Pull on/off")
-    elseif value == 'on' then
-        gui.pullOn = true
-        gui.chase = false
-        gui.returnToCamp = true
-        print("Pulling is now enabled.")
-    elseif value == 'off' then
-        gui.pullOn = false
-        print("Pulling is now disabled.")
-    end
-end
-
-local function setPullPause(value)
-    if value == "" then
-        print("Usage: /convbard PullPause on/off")
-    elseif value == 'on' then
-        gui.pullPause = true
-        print("Pull Pause is now enabled")
-    elseif value == 'off' then
-        gui.pullPause = false
-        print("Pull Pause is now disabled")
+        print("Error: Invalid song name or command. Usage: /convBRD singsong on/off or /convBRD singsong <songname> on/off")
     end
 end
 
@@ -417,7 +283,7 @@ local function setMezIgnore(scope, action)
         print(string.format("'%s' has been removed from the %s.", targetName, scopeText))
 
     else
-        print("Error: Invalid action. Usage: /convbard mezignore zone/global add/remove")
+        print("Error: Invalid action. Usage: /convBRD mezignore zone/global add/remove")
     end
 end
 
@@ -443,7 +309,7 @@ local function setPullIgnore(scope, action)
         print(string.format("'%s' has been removed from the %s.", targetName, scopeText))
 
     else
-        print("Error: Invalid action. Usage: /convbard pullignore zone/global add/remove")
+        print("Error: Invalid action. Usage: /convBRD pullignore zone/global add/remove")
     end
 end
 
@@ -513,8 +379,8 @@ local function commandHandler(command, ...)
 end
 
 function commands.init()
-    -- Single binding for the /convbard command
-    mq.bind('/convbard', function(command, ...)
+    -- Single binding for the /convBRD command
+    mq.bind('/convBRD', function(command, ...)
         commandHandler(command, ...)
     end)
 end
