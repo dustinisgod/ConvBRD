@@ -206,38 +206,44 @@ local function pullTarget()
 
             -- Attempt to use pull ability up to 3 times
             local attempts = 0
+            local success = false
             while attempts < 3 do
+                -- Ensure we have a target and are in line of sight, and Navigation is inactive
                 if mq.TLO.Target() and not mq.TLO.Navigation.Active() and mq.TLO.Target.LineOfSight() then
-                    local pullability = "220"   -- Distant Strike
+                    local pullability = "220"  -- Distant Strike
                     mq.cmdf("/alt act %s", pullability)
                     mq.delay(200)
 
                     -- Check if aggro was gained
-                    if mq.TLO.Target and mq.TLO.Target.PctAggro() > 0 then
-                        local targetID = target.ID()
+                    if mq.TLO.Target() and mq.TLO.Target.PctAggro() > 0 then
+                        local targetID = mq.TLO.Target.ID()
                         if type(targetID) == "number" then
                             table.insert(aggroQueue, targetID)
                         end
                         returnToCampIfNeeded()
-                        return  -- Exit after successful pull
+                        success = true
+                        break  -- Exit after successful pull
+                    else
+                        attempts = attempts + 1  -- Increment attempts if aggro is not gained
                     end
                 else
+                    print("Conditions not met for pulling. Exiting loop.")
                     break  -- Exit if conditions aren't met
                 end
-                attempts = attempts + 1
                 mq.delay(500)  -- Delay before retrying
             end
 
-        -- Switch to melee pull if within 40 units
-        elseif distance <= 40 then
-            mq.cmd("/nav stop")
-            mq.delay(200)
+            if not success then
+                print("Pull unsuccessful after 3 attempts. Moving on.")
+            end
 
             -- Navigate closer if more than 15 units away
             if distance > 15 then
-                mq.cmd("/nav target")
-                mq.delay(100, function() return mq.TLO.Navigation.Active() end)
-
+                if not mq.TLO.Navigation.Active() then
+                    mq.cmd("/nav target")
+                    mq.delay(200)
+                end
+                
                 -- Wait until within 15 units or navigation stops
                 while mq.TLO.Target and mq.TLO.Navigation.Active() and target.Distance() > 15 do
                     mq.delay(10)

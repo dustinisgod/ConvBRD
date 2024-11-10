@@ -90,30 +90,35 @@ function utils.monitorNav()
             nav.chase()
             lastNavTime = currentTime
         end
+    else
+        return
     end
 end
 
 function utils.assistMonitor()
     local assist = require('assist')
-    -- If gui.pullOn is not enabled, call assist immediately
-    if not gui.pullOn then
-        assist.assistRoutine()
-        return
-    end
-
-    -- Check campQueue requirements if pulling is enabled
-    local campQueueSize = #gui.campQueue
-
-    -- If `gui.keepMobsInCamp` is checked, ensure campQueue has at least `keepMobsInCampAmount` mobs
-    if gui.keepMobsInCamp then
-        if campQueueSize >= gui.keepMobsInCampAmount then
+    if gui.botOn then
+        if not gui.pullOn then
             assist.assistRoutine()
+            return
+        end
+
+        -- Check campQueue requirements if pulling is enabled
+        local campQueueSize = #gui.campQueue
+
+        -- If `gui.keepMobsInCamp` is checked, ensure campQueue has at least `keepMobsInCampAmount` mobs
+        if gui.keepMobsInCamp then
+            if campQueueSize >= gui.keepMobsInCampAmount then
+                assist.assistRoutine()
+            end
+        else
+            -- Otherwise, ensure campQueue has at least 1 mob if `gui.pullOn` is enabled
+            if campQueueSize >= 1 then
+                assist.assistRoutine()
+            end
         end
     else
-        -- Otherwise, ensure campQueue has at least 1 mob if `gui.pullOn` is enabled
-        if campQueueSize >= 1 then
-            assist.assistRoutine()
-        end
+        return
     end
 end
 

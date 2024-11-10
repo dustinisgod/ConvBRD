@@ -472,6 +472,16 @@ local function controlGUI()
             ImGui.Separator()
             ImGui.Spacing()
 
+            gui.keepMobsInCamp = ImGui.Checkbox("Keep Mobs In Camp", gui.keepMobsInCamp or false)
+                if gui.keepMobsInCamp then
+                    ImGui.SetNextItemWidth(100)
+                    gui.keepMobsInCampAmount = ImGui.SliderInt("Camp Mobs", gui.keepMobsInCampAmount, 1, 40)
+                end
+
+            ImGui.Spacing()
+            ImGui.Separator()
+            ImGui.Spacing()
+
             gui.pullPause = ImGui.Checkbox("Pull Pause", gui.pullPause or false)
             if gui.pullPause then
                 ImGui.SetNextItemWidth(100)
@@ -479,17 +489,6 @@ local function controlGUI()
                 ImGui.SetNextItemWidth(100)
                 gui.pullPauseDuration = ImGui.SliderInt("Pause Length", gui.pullPauseDuration, 1, 15)
             end
-
-
-            ImGui.Spacing()
-            ImGui.Separator()
-            ImGui.Spacing()
-
-            gui.keepMobsInCamp = ImGui.Checkbox("Keep Mobs In Camp", gui.keepMobsInCamp or false)
-                if gui.keepMobsInCamp then
-                    ImGui.SetNextItemWidth(100)
-                    gui.keepMobsInCampAmount = ImGui.SliderInt("Camp Mobs", gui.keepMobsInCampAmount, 1, 40)
-                end
 
             ImGui.Spacing()
             ImGui.Separator()
