@@ -3,7 +3,7 @@ local ImGui = require('ImGui')
 
 
 local charName = mq.TLO.Me.Name()
-local configPath = mq.configDir .. '/' .. 'ConvBard_'.. charName .. '_config.lua'
+local configPath = mq.configDir .. '/' .. 'ConvBRD_'.. charName .. '_config.lua'
 local config = {}
 
 local gui = {}
