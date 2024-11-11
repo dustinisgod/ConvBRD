@@ -209,8 +209,18 @@ local function pullTarget()
 
     local attempts = 0
     while attempts < 3 do
+        
+        if not mq.TLO.Target() then
+            print("Error: No target selected. Exiting pull routine.")
+            return
+        end
+
         if mq.TLO.Target() and not mq.TLO.Navigation.Active() and mq.TLO.Target.LineOfSight() and mq.TLO.Target.PctAggro() <= 0 then
 
+            if not pullability then
+                print("Error: pullability is nil. Check if the ability ID is correctly set.")
+                return
+            end
             mq.cmdf("/alt act %s", pullability)
 
             local timeout = os.time() + 2
@@ -334,8 +344,6 @@ local function checkHealthAndBuff()
         shownMessage = false
     end
 end
-
-local campQueueCount = 0  -- Variable to track the number of mobs in campQueue
 
 local function pullRoutine()
     checkHealthAndBuff()
