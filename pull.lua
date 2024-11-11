@@ -9,6 +9,8 @@ local campQueue = {}
 local aggroQueue = {}  -- New queue to track mobs on their way to camp
 local campQueueCount = 0  -- Variable to track the number of mobs in campQueue
 
+local pullability = "220"
+
 local messagePrintedFlags = {
     CLR = false,
     DRU = false,
@@ -220,7 +222,7 @@ local function pullTarget()
     local attempts = 0
     while attempts < 3 do
         if mq.TLO.Target() and not mq.TLO.Navigation.Active() and mq.TLO.Target.LineOfSight() and mq.TLO.Target.PctAggro() <= 0 then
-            local pullability = "220"
+
             mq.cmdf("/alt act %s", pullability)
 
             local timeout = os.time() + 2
