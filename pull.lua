@@ -2,10 +2,12 @@ local mq = require('mq')
 local gui = require('gui')
 local utils = require('utils')
 local nav = require('nav')
+local corpsedrag = require('corpsedrag')
 
 local pullQueue = {}
-gui.campQueue = {}
+local campQueue = {}
 local aggroQueue = {}  -- New queue to track mobs on their way to camp
+local campQueueCount = 0  -- Variable to track the number of mobs in campQueue
 
 local messagePrintedFlags = {
     CLR = false,
@@ -14,6 +16,18 @@ local messagePrintedFlags = {
     ENC = false
 }
 local pullPauseTimer = os.time()  -- Initialize with the current time
+
+-- Function to add a mob to the campQueue
+local function addToCampQueue(mob)
+    table.insert(campQueue, mob)
+    campQueueCount = campQueueCount + 1
+end
+
+-- Function to remove a mob from the campQueue
+local function removeFromCampQueue(index)
+    table.remove(campQueue, index)
+    campQueueCount = campQueueCount - 1
+end
 
 local function getCleanName(name)
     if not name then
@@ -25,7 +39,7 @@ end
 local function updatePullQueue()
     -- Initialize pullQueue and reference campQueue location
     pullQueue = {}
-    gui.campQueue = utils.referenceLocation(gui.campSize) or {}
+    campQueue = utils.referenceLocation(gui.campSize) or {}
 
     -- Set pulling parameters
     local pullDistanceXY = gui.pullDistanceXY
@@ -127,7 +141,7 @@ local function updateAggroQueue()
             -- Verify mob is still the target and has aggro
             if mq.TLO.Target.ID() ~= mobID then
                 table.remove(aggroQueue, i)  -- Remove if target doesn't match
-            elseif mq.TLO.Target.PctAggro() == 0 then
+            elseif mq.TLO.Target.PctAggro() == 0 or not mq.TLO.Target.AggroHolder() then
                 table.remove(aggroQueue, i)  -- Remove if no aggro
             else
                 -- Check if mob is within the camp assist range
@@ -153,33 +167,28 @@ end
 
 
 local function pullTarget()
-    -- Check if the pullQueue is empty
+
     if #pullQueue == 0 then
         return
     end
 
-    -- Initialize target
     local target = pullQueue[1]
     mq.cmd("/attack off")
-    mq.delay(200)
+    mq.delay(100)
 
-    -- Target the mob
     mq.cmdf("/target id %d", target.ID())
-    mq.delay(1000, function() return mq.TLO.Target.ID() == target.ID() end)
+    mq.delay(200, function() return mq.TLO.Target.ID() == target.ID() end)
 
-    -- Check if targeting was successful
     if mq.TLO.Target and mq.TLO.Target.ID() ~= target.ID() then
         return
     end
 
-    -- Handle mezzed mob
     if mq.TLO.Target and mq.TLO.Target.Mezzed() and mq.TLO.Target.Distance() <= (gui.campSize + 20) then
         table.insert(gui.campQueue, target)
         table.remove(pullQueue, 1)
         return
     end
 
-    -- Check if target already has aggro
     if mq.TLO.Target and mq.TLO.Target.PctAggro() > 0 then
         local targetID = target.ID()
         if type(targetID) == "number" then
@@ -190,106 +199,80 @@ local function pullTarget()
         return
     end
 
-    -- Begin navigation towards the target
     mq.cmdf("/nav id %d", target.ID())
-    mq.delay(100, function() return mq.TLO.Navigation.Active() end)
+    mq.delay(50, function() return mq.TLO.Navigation.Active() end)
 
-    -- Pull or melee depending on distance
     while mq.TLO.Target and mq.TLO.Navigation.Active() do
         local distance = target.Distance()
         local pullRange = 160
 
-        -- Use pull ability if within range but further than 40 units
+        if gui.corpseDrag then
+            corpsedrag.dragCheck()
+            break
+        end
+
         if mq.TLO.Target and distance <= pullRange and distance > 40 and mq.TLO.Target.LineOfSight() then
             mq.cmd("/nav stop")
-            mq.delay(100)
+            mq.delay(200)
+        end
+    end
 
-            -- Attempt to use pull ability up to 3 times
-            local attempts = 0
-            local success = false
-            while attempts < 3 do
-                -- Ensure we have a target and are in line of sight, and Navigation is inactive
-                if mq.TLO.Target() and not mq.TLO.Navigation.Active() and mq.TLO.Target.LineOfSight() then
-                    local pullability = "220"  -- Distant Strike
-                    mq.cmdf("/alt act %s", pullability)
-                    mq.delay(200)
+    local attempts = 0
+    while attempts < 3 do
+        if mq.TLO.Target() and not mq.TLO.Navigation.Active() and mq.TLO.Target.LineOfSight() and mq.TLO.Target.PctAggro() <= 0 then
+            local pullability = "220"
+            mq.cmdf("/alt act %s", pullability)
 
-                    -- Check if aggro was gained
-                    if mq.TLO.Target() and mq.TLO.Target.PctAggro() > 0 then
-                        local targetID = mq.TLO.Target.ID()
-                        if type(targetID) == "number" then
-                            table.insert(aggroQueue, targetID)
-                        end
-                        returnToCampIfNeeded()
-                        success = true
-                        break  -- Exit after successful pull
-                    else
-                        attempts = attempts + 1  -- Increment attempts if aggro is not gained
-                    end
-                else
-                    print("Conditions not met for pulling. Exiting loop.")
-                    break  -- Exit if conditions aren't met
-                end
-                mq.delay(500)  -- Delay before retrying
-            end
-
-            if not success then
-                print("Pull unsuccessful after 3 attempts. Moving on.")
-            end
-
-            -- Navigate closer if more than 15 units away
-            if distance > 15 then
-                if not mq.TLO.Navigation.Active() then
-                    mq.cmd("/nav target")
-                    mq.delay(200)
-                end
-                
-                -- Wait until within 15 units or navigation stops
-                while mq.TLO.Target and mq.TLO.Navigation.Active() and target.Distance() > 15 do
-                    mq.delay(10)
-                    if mq.TLO.Target and mq.TLO.Target.PctAggro() > 0 then
-                        mq.cmd("/nav stop")
-                        mq.delay(200)
-
-                        local targetID = target.ID()
-                        if type(targetID) == "number" then
-                            table.insert(aggroQueue, targetID)
-                        end
-                        returnToCampIfNeeded()
-                        return
-                    end
-                end
-                mq.cmd("/nav stop")
-                mq.delay(200)
-            end
-
-            -- Engage with melee attack
-            mq.cmd("/attack on")
             local timeout = os.time() + 2
-
-            -- Poll for aggro status
-            while mq.TLO.Target() and mq.TLO.Target.PctAggro() == 0 do
+            while mq.TLO.Target() and mq.TLO.Target.PctAggro() <= 0 do
                 mq.delay(1)
                 if os.time() > timeout then
-                    mq.cmd("/attack off")
-                    return
+                    attempts = attempts + 1
+                    break
                 end
             end
-
-            -- Confirm target has aggro
-            local aggro = mq.TLO.Target.PctAggro()
-            if mq.TLO.Target() and aggro > 0 then
-                mq.cmd("/attack off")
-
+            if mq.TLO.Target() and mq.TLO.Target.PctAggro() > 0 then
                 local targetID = mq.TLO.Target.ID()
                 if type(targetID) == "number" then
                     table.insert(aggroQueue, targetID)
                 end
                 returnToCampIfNeeded()
-                return -- Exit after successful melee pull
+                return
+            end
+        else
+            returnToCampIfNeeded()
+            return
+        end
+        mq.delay(200)
+    end
+
+    if mq.TLO.Target.Distance > 15 then
+        mq.cmd("/nav target")
+        mq.delay(50)
+        
+        while mq.TLO.Target and mq.TLO.Navigation.Active() and target.Distance() > 15 and mq.TLO.Target.PctAggro() < 1 do
+            mq.delay(10)
+        end
+
+    else
+        local timeout = os.time() + 2
+        mq.cmd("/attack on")
+        while mq.TLO.Target() and mq.TLO.Target.PctAggro() < 1 do
+            mq.delay(1)
+            if os.time() > timeout then
+                mq.cmd("/squelch /attack off")
+                return
             end
         end
-        mq.delay(10)  -- Small delay to prevent loop overuse
+        if mq.TLO.Target() and mq.TLO.Target.PctAggro() > 0 then
+            mq.cmd("/squelch /attack off")
+            local targetID = mq.TLO.Target.ID()
+            if type(targetID) == "number" then
+                table.insert(aggroQueue, targetID)
+            end
+            returnToCampIfNeeded()
+            return
+        end
     end
 end
 
@@ -430,6 +413,7 @@ return {
     updatePullQueue = updatePullQueue,
     pullRoutine = pullRoutine,
     pullQueue = pullQueue,
-    campQueue = gui.campQueue,
-    aggroQueue = aggroQueue,  -- Export aggroQueue for external monitoring if needed
+    campQueue = campQueue,
+    aggroQueue = aggroQueue,
+    campQueueCount = campQueueCount,
 }

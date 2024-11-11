@@ -61,7 +61,7 @@ local function setDefaultConfig()
     gui.groupWatchSHMMana = 10
     gui.groupWatchENC = false
     gui.groupWatchENCMana = 10
-
+    gui.corpseDrag = false
 end
 
 function gui.getPullDistanceXY()
@@ -95,18 +95,6 @@ local function loadConfig()
 end
 
 loadConfig()
-
-local function DrawComboBox(label, resultvar, options)
-    if ImGui.BeginCombo(label, resultvar) then
-        for i, j in pairs(options) do
-            if ImGui.Selectable(j, j == resultvar) then
-                resultvar = j
-            end
-        end
-        ImGui.EndCombo()
-    end
-    return resultvar
-end
 
 function ColoredText(text, color)
     ImGui.TextColored(color[1], color[2], color[3], color[4], text)
@@ -520,6 +508,16 @@ local function controlGUI()
                 end
             end
         end
+    end
+
+    ImGui.Spacing()
+        if ImGui.CollapsingHeader("Misc Settings") then
+
+            ImGui.Spacing()
+        
+            gui.corpseDrag = ImGui.Checkbox("Corpse Drag", gui.corpseDrag or false)
+
+            ImGui.Spacing()
     end
 
     ImGui.End()

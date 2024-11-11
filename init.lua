@@ -11,6 +11,8 @@ local currentLevel = mq.TLO.Me.Level()
 
 utils.PluginCheck()
 
+mq.cmd('/assist off')
+
 mq.imgui.init('controlGUI', gui.controlGUI)
 
 commands.init()
