@@ -29,7 +29,6 @@ function assist.assistRoutine()
     local mainAssistSpawn = mq.TLO.Spawn(gui.mainAssist)
     if mainAssistSpawn and mainAssistSpawn.Type() == "PC" and not mainAssistSpawn.Dead() then
         mq.cmdf("/assist %s", gui.mainAssist)
-        print (string.format("Assisting %s", mq.TLO.Target.Name()))
         mq.delay(200)  -- Short delay to allow the assist command to take effect
     else
         return
