@@ -179,17 +179,17 @@ local function pullTarget()
     mq.cmdf("/target id %d", target.ID())
     mq.delay(200, function() return mq.TLO.Target.ID() == target.ID() end)
 
-    if mq.TLO.Target and mq.TLO.Target.ID() ~= target.ID() then
+    if mq.TLO.Target() and mq.TLO.Target.ID() ~= target.ID() then
         return
     end
 
-    if mq.TLO.Target and mq.TLO.Target.Mezzed() and mq.TLO.Target.Distance() <= (gui.campSize + 20) then
+    if mq.TLO.Target() and mq.TLO.Target.Mezzed() and mq.TLO.Target.Distance() <= (gui.campSize + 20) then
         table.insert(gui.campQueue, target)
         table.remove(pullQueue, 1)
         return
     end
 
-    if mq.TLO.Target and mq.TLO.Target.PctAggro() > 0 then
+    if mq.TLO.Target() and mq.TLO.Target.PctAggro() > 0 then
         local targetID = target.ID()
         if type(targetID) == "number" then
             table.insert(aggroQueue, targetID)
@@ -202,7 +202,7 @@ local function pullTarget()
     mq.cmdf("/nav id %d", target.ID())
     mq.delay(50, function() return mq.TLO.Navigation.Active() end)
 
-    while mq.TLO.Target and mq.TLO.Navigation.Active() do
+    while mq.TLO.Target() and mq.TLO.Navigation.Active() do
         local distance = target.Distance()
         local pullRange = 160
 
@@ -211,7 +211,7 @@ local function pullTarget()
             break
         end
 
-        if mq.TLO.Target and distance <= pullRange and distance > 40 and mq.TLO.Target.LineOfSight() then
+        if mq.TLO.Target() and distance <= pullRange and distance > 40 and mq.TLO.Target.LineOfSight() then
             mq.cmd("/nav stop")
             mq.delay(200)
         end
@@ -246,11 +246,11 @@ local function pullTarget()
         mq.delay(200)
     end
 
-    if mq.TLO.Target.Distance > 15 then
+    if mq.TLO.Target() and mq.TLO.Target.Distance() > 15 then
         mq.cmd("/nav target")
         mq.delay(50)
         
-        while mq.TLO.Target and mq.TLO.Navigation.Active() and target.Distance() > 15 and mq.TLO.Target.PctAggro() < 1 do
+        while mq.TLO.Target() and mq.TLO.Navigation.Active() and target.Distance() > 15 and mq.TLO.Target.PctAggro() < 1 do
             mq.delay(10)
         end
 
@@ -345,61 +345,51 @@ local function checkHealthAndBuff()
     end
 end
 
+local campQueueCount = 0  -- Variable to track the number of mobs in campQueue
+
 local function pullRoutine()
     checkHealthAndBuff()
 
     if gui.botOn and gui.pullOn then
-        -- Check if pullPause is enabled and timer has exceeded pullPauseTimer minutes
         if gui.pullPause and os.difftime(os.time(), pullPauseTimer) >= (gui.pullPauseTimer * 60) then
-            -- Ensure player is in camp
             if utils.isInCamp() then
                 print("Pull routine paused for " .. gui.pullPauseDuration .. " minutes.")
+                mq.delay(gui.pullPauseDuration * 60 * 1000)  -- Pause timer
 
-                -- Pause timer by waiting the pullPauseDuration
-                mq.delay(gui.pullPauseDuration * 60 * 1000) -- Convert minutes to milliseconds
-
-                -- Clear and reinitialize aggroQueue on resume to prevent stale entries
                 aggroQueue = {}
                 updateAggroQueue()
 
-                -- Resume pull routine and reset pullPauseTimer
-                pullPauseTimer = os.time() -- Reset the timer
+                pullPauseTimer = os.time()  -- Reset the timer
             end
         end
 
-        -- Ensure campQueue and aggroQueue are initialized
         gui.campQueue = utils.referenceLocation(gui.campSize) or {}
-        aggroQueue = aggroQueue or {}
+        campQueueCount = #gui.campQueue  -- Update campQueueCount to track mob count
 
-        -- Update aggroQueue and check if mobs reached camp
+        aggroQueue = aggroQueue or {}
         updateAggroQueue()
 
-        -- Ensure gui.keepMobsInCampAmount is set and has a sensible value
         local targetCampAmount = gui.keepMobsInCampAmount or 1
 
-        -- Determine the pull condition based on gui.keepMobsInCamp
         local pullCondition
         if gui.keepMobsInCamp then
-            pullCondition = function() return #gui.campQueue < targetCampAmount and #aggroQueue == 0 end
+            pullCondition = function() return campQueueCount < targetCampAmount and #aggroQueue == 0 end
         else
-            pullCondition = function() return #gui.campQueue == 0 and #aggroQueue == 0 end
+            pullCondition = function() return campQueueCount == 0 and #aggroQueue == 0 end
         end
 
-        -- Pull loop with dynamic pull condition
         while pullCondition() do
-            -- Check group member health and mana status before each pull
             local groupStatusOk = checkGroupMemberStatus()
             if not groupStatusOk then
-                break -- Exit the loop if a group member is dead or low on mana
+                break
             end
 
             updatePullQueue()
             if #pullQueue > 0 then
-                -- Attempt to pull target
                 pullTarget()
 
-                -- Update campQueue and campMobs after each pull
                 gui.campQueue = utils.referenceLocation(gui.campSize) or {}
+                campQueueCount = #gui.campQueue  -- Refresh campQueueCount after updating campQueue
 
                 updateAggroQueue()
             else
@@ -415,5 +405,5 @@ return {
     pullQueue = pullQueue,
     campQueue = campQueue,
     aggroQueue = aggroQueue,
-    campQueueCount = campQueueCount,
+    campQueueCount = campQueueCount
 }
