@@ -53,15 +53,23 @@ while gui.controlGUI do
 
     if gui.botOn then
 
-        utils.twistSongMonitor()
+        if gui.singSongs then
+            utils.twistSongMonitor()
+        end
 
         utils.monitorNav()
 
-        pull.pullRoutine()
+        if gui.pullOn then
+            pull.pullRoutine()
+        end
 
-        mez.mezRoutine()
+        if gui.singSongs and gui.singMez then
+            mez.mezRoutine()
+        end
 
-        utils.assistMonitor()
+        if gui.assistMelee then
+            utils.assistMonitor()
+        end
 
         checkBotOn(currentLevel)
 

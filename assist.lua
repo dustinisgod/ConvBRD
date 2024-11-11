@@ -43,12 +43,9 @@ function assist.assistRoutine()
         if gui.stickFront then
             mq.cmdf("/stick front %d uw", gui.stickDistance)
             mq.delay(100)
-            mq.cmd("/face")
         elseif gui.stickBehind then
             mq.cmdf("/stick behind %d uw", gui.stickDistance)
             mq.delay(100)
-            mq.cmd("/face")
-            
         end
 
         while mq.TLO.Target() and mq.TLO.Target.Distance() > gui.stickDistance do
@@ -62,7 +59,7 @@ function assist.assistRoutine()
         end
     end
 
-    if mq.TLO.Me.CombatState() == "COMBAT" and mq.TLO.Target() and mq.TLO.Target.PctHPs() > 0 then
+    if mq.TLO.Me.CombatState() == "COMBAT" and mq.TLO.Target() and mq.TLO.Target.Dead() ~= ("true" or "nil") then
 
         if mq.TLO.Target() and not mq.TLO.Target.Mezzed() and mq.TLO.Target.PctHPs() <= gui.assistPercent and mq.TLO.Target.Distance() <= gui.assistRange then
             mq.cmd("/squelch /attack on")
@@ -79,25 +76,18 @@ function assist.assistRoutine()
             end
         end
 
-        if mq.TLO.Target() and mq.TLO.Target.Distance() > gui.stickDistance then
-            if gui.stickFront then
-                mq.cmdf("/stick front %d uw", gui.stickDistance)
+        if mq.TLO.Target() and mq.TLO.Stick() == "ON" then
+            local stickDistance = gui.stickDistance
+            local lowerBound = stickDistance * 0.9
+            local upperBound = stickDistance * 1.1
+            local targetDistance = mq.TLO.Target.Distance()
+        
+            if targetDistance > upperBound then
+                mq.cmdf("/stick moveback %s", stickDistance)
                 mq.delay(100)
-                mq.cmd("/face")
-            elseif gui.stickBehind then
-                mq.cmdf("/stick behind %d uw", gui.stickDistance)
+            elseif targetDistance < lowerBound then
+                mq.cmdf("/stick moveback %s", stickDistance)
                 mq.delay(100)
-                mq.cmd("/face")
-            end
-        elseif mq.TLO.Target() and mq.TLO.Target.Distance() < (gui.stickDistance / 2) then
-            if gui.stickFront then
-                mq.cmdf("/stick front %d uw", gui.stickDistance)
-                mq.delay(100)
-                mq.cmd("/face")
-            elseif gui.stickBehind then
-                mq.cmdf("/stick behind %d uw", gui.stickDistance)
-                mq.delay(100)
-                mq.cmd("/face")
             end
         end
         mq.delay(50)

@@ -11,6 +11,8 @@ local campQueueCount = 0  -- Variable to track the number of mobs in campQueue
 
 local pullability = "220"
 
+local zone = mq.TLO.Zone.ShortName() or "Unknown"
+
 local messagePrintedFlags = {
     CLR = false,
     DRU = false,
@@ -86,6 +88,31 @@ local function updatePullQueue()
 
     -- Sort pullQueue by distance
     table.sort(pullQueue, function(a, b) return a.Distance() < b.Distance() end)
+end
+
+local function isGroupOrRaidMember(memberName)
+    local aggroHolderName = mq.TLO.Target.AggroHolder.Name()  -- Get the name of the aggro holder
+
+    -- Check raid members if not already found in group
+    if mq.TLO.Raid.Members() > 0 then
+        local raidSize = mq.TLO.Raid.Members() or 0
+        for i = 1, raidSize do
+            if mq.TLO.Raid.Member(i).Name() == aggroHolderName then
+            return true
+            else
+                return false
+            end
+        end
+    elseif mq.TLO.Me.Grouped() then  -- Verify the player is in a group
+        local groupSize = mq.TLO.Group.Members() or 0
+        for i = 1, groupSize do
+            if mq.TLO.Group.Member(i).Name() == aggroHolderName then
+                return true
+            else
+                return false
+            end
+        end
+    end
 end
 
 local function returnToCampIfNeeded()
@@ -179,7 +206,7 @@ local function pullTarget()
         return
     end
 
-    if mq.TLO.Target() and mq.TLO.Target.PctAggro() > 0 then
+    if mq.TLO.Target() and mq.TLO.Target.PctAggro() > 0 or isGroupOrRaidMember() then
         local targetID = target.ID()
         if type(targetID) == "number" then
             table.insert(aggroQueue, targetID)
@@ -359,6 +386,11 @@ local function pullRoutine()
 
                 pullPauseTimer = os.time()  -- Reset the timer
             end
+        end
+
+        if zone ~= nav.campLocation.zone or zone == "unknown" then
+            print("Current zone does not match camp zone. Aborting pull routine.")
+            return
         end
 
         gui.campQueue = utils.referenceLocation(gui.campSize) or {}
