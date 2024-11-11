@@ -7,6 +7,12 @@ local spells = require('spells')
 local pull = require('pull')
 local mez = require('mez')
 
+local class = mq.TLO.Me.Class()
+if class ~= "Bard" then
+    print("This script is only for Bards.")
+    mq.exit()
+end
+
 local currentLevel = mq.TLO.Me.Level()
 
 utils.PluginCheck()
