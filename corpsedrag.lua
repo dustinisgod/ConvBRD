@@ -130,12 +130,8 @@ local function isCorpseFromGroupOrRaid(corpse, inRaid, inGroup)
     local corpsename = corpse.CleanName()  -- Get the full corpse name
     local corpseadd = "'s corpse"  -- Used for name comparison
 
-    -- Debug: Print the corpse name
-    print("Corpse Name: " .. corpsename)
-
     -- Always allow dragging the dragger's own corpse
     if isOwnCorpse(corpse) then
-        print("Dragging own corpse")
         return true
     end
 
@@ -182,7 +178,6 @@ local function drag(corpse, dragname)
     
             -- Navigate back to camp if beyond threshold
             if distanceToCamp <= 30 then
-print("In Camp")
                 break
             end
         end
@@ -199,7 +194,6 @@ print("In Camp")
 
         -- Verify that the corpse belongs to a group or raid member, or is the dragger's own corpse
         if not isCorpseFromGroupOrRaid(corpse, inRaid, inGroup) then
-print("Corpse does not belong to a group or raid member, removing from draggedCorpses.")
             return
         end
 
@@ -220,7 +214,6 @@ print("Corpse does not belong to a group or raid member, removing from draggedCo
         if target_distance == nil or current_target_name ~= corpse.Name() then
             -- Attempt to target the corpse by ID
             mq.cmdf('/target id %d', corpse.ID())
-print("Targeting corpse", dragname)
             mq.delay(100)
 
             -- Refresh the target name and distance
@@ -237,7 +230,6 @@ print("Targeting corpse", dragname)
 
         -- Proceed with dragging only if distance is within the allowed range
         if target_distance and target_distance <= maxdistance and target_distance >= mindistance then
-print("Dragging corpse", dragname)
             mq.cmd('/squelch /corpse')  -- Attempt to drag the corpse
             mq.delay(100)  -- Delay between dragging actions to avoid spamming
         end
