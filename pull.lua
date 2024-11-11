@@ -19,18 +19,6 @@ local messagePrintedFlags = {
 }
 local pullPauseTimer = os.time()  -- Initialize with the current time
 
--- Function to add a mob to the campQueue
-local function addToCampQueue(mob)
-    table.insert(campQueue, mob)
-    campQueueCount = campQueueCount + 1
-end
-
--- Function to remove a mob from the campQueue
-local function removeFromCampQueue(index)
-    table.remove(campQueue, index)
-    campQueueCount = campQueueCount - 1
-end
-
 local function getCleanName(name)
     if not name then
         return ""
