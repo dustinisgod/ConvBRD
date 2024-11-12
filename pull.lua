@@ -342,7 +342,7 @@ local shownMessage = false  -- Flag to track if the message has been shown
 
 -- Main check function to run periodically
 local function checkHealthAndBuff()
-    local hasRezSickness = mq.TLO.Me.Buff(13087)()
+    local hasRezSickness = mq.TLO.Me.Buff("Revival Sickness")()
     local healthPct = mq.TLO.Me.PctHPs()
     local rooted = mq.TLO.Me.Rooted()
 
@@ -371,11 +371,18 @@ local function pullRoutine()
             end
         end
 
-        if zone ~= nav.campLocation.zone or zone == "unknown" or zone == "nil" then
+        -- Check if nav.campLocation exists and has a valid zone
+        if not nav.campLocation or not nav.campLocation.zone or nav.campLocation.zone == "unknown" then
+            print("Camp location is not set. Aborting pull routine.")
+            return
+        end
+        
+        -- Check if the current zone matches camp zone
+        if zone ~= nav.campLocation.zone or zone == "unknown" or zone == "nil" or zone == "" then
             print("Current zone does not match camp zone. Aborting pull routine.")
             return
         end
-
+        
         gui.campQueue = utils.referenceLocation(gui.campSize) or {}
         campQueueCount = #gui.campQueue  -- Update campQueueCount to track mob count
 
