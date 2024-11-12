@@ -96,11 +96,11 @@ function mez.mezRoutine()
 
         while attempts < 2 and not mezSuccessful do
             attempts = attempts + 1
-            mq.cmd("/attack off")
+            mq.cmd("/squelch /attack off")
             mq.delay(100)
 
             if mq.TLO.Target.ID() ~= mobID then
-                mq.cmdf("/target id %d", mobID)
+                mq.cmdf("/squelch /target id %d", mobID)
                 mq.delay(500)
             end
 
@@ -112,17 +112,17 @@ function mez.mezRoutine()
             -- Attempt to cast mez
             if not mq.TLO.Target.Mezzed() or mq.TLO.Target.Mezzed.Duration() < MEZ_RECHECK_THRESHOLD then
                 if mq.TLO.Twist() == "TRUE" then
-                    mq.cmd("/twist off")
+                    mq.cmd("/squelch /twist off")
                     mq.delay(200)
                 end
 
-                mq.cmd("/cast 8")
+                mq.cmd("/squelch /cast 8")
                 mq.delay(300)
 
                 -- Monitor casting completion and apply mez
                 while mq.TLO.Me.Casting() do
                     if mq.TLO.Target.ID() ~= mobID or mq.TLO.Target.Distance() > gui.mezRadius or mq.TLO.Target.PctHPs() < gui.mezStopPercent then
-                        mq.cmd("/stopcast")
+                        mq.cmd("/squelch /stopcast")
                         break
                     elseif mq.TLO.Target.Mezzed() and mq.TLO.Target.Mezzed.Duration() > MEZ_RECHECK_THRESHOLD then
                         updateMezStatus(mobID, mq.TLO.Target.Mezzed.Duration() / 1000)

@@ -28,7 +28,7 @@ function assist.assistRoutine()
     -- Check if the main assist is a valid PC, is alive, and is in the same zone
     local mainAssistSpawn = mq.TLO.Spawn(gui.mainAssist)
     if mainAssistSpawn and mainAssistSpawn.Type() == "PC" and not mainAssistSpawn.Dead() then
-        mq.cmdf("/assist %s", gui.mainAssist)
+        mq.cmdf("/squelch /assist %s", gui.mainAssist)
         mq.delay(200)  -- Short delay to allow the assist command to take effect
     else
         return
@@ -41,14 +41,14 @@ function assist.assistRoutine()
 
     if mq.TLO.Target() and mq.TLO.Target.PctHPs() <= gui.assistPercent and mq.TLO.Target.Distance() <= gui.assistRange and mq.TLO.Stick() == "OFF" and not mq.TLO.Target.Mezzed() then
         if gui.stickFront then
-            mq.cmd('/nav stop')
+            mq.cmd('/squelch /nav stop')
             mq.delay(100)
-            mq.cmdf("/stick front %d uw", gui.stickDistance)
+            mq.cmdf("/squelch /stick front %d uw", gui.stickDistance)
             mq.delay(100)
         elseif gui.stickBehind then
-            mq.cmd('/nav stop')
+            mq.cmd('/squelch /nav stop')
             mq.delay(100)
-            mq.cmdf("/stick behind %d uw", gui.stickDistance)
+            mq.cmdf("/squelch /stick behind %d uw", gui.stickDistance)
             mq.delay(100)
         end
 
@@ -72,9 +72,9 @@ function assist.assistRoutine()
         end
 
         if mq.TLO.Target() and gui.singSongs and gui.singAgroReduction and charLevel >= 53 and mq.TLO.Me.PctAggro() >= 80 and mq.TLO.Target.Distance() <= gui.assistRange then
-            mq.cmd("/twist off")
+            mq.cmd("/squelch /twist off")
             mq.delay(200)
-            mq.cmd("/cast 7")
+            mq.cmd("/squelch /cast 7")
             while mq.TLO.Target() and mq.TLO.Me.PctAggro() > 80 and mq.TLO.Target.AggroHolder() do
                 mq.delay(10)
             end
@@ -87,10 +87,10 @@ function assist.assistRoutine()
             local targetDistance = mq.TLO.Target.Distance()
         
             if targetDistance > upperBound then
-                mq.cmdf("/stick moveback %s", stickDistance)
+                mq.cmdf("/squelch /stick moveback %s", stickDistance)
                 mq.delay(100)
             elseif targetDistance < lowerBound then
-                mq.cmdf("/stick moveback %s", stickDistance)
+                mq.cmdf("/squelch /stick moveback %s", stickDistance)
                 mq.delay(100)
             end
         end

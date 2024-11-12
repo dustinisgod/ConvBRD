@@ -232,7 +232,6 @@ function utils.referenceLocation(range)
         return spawn.Type() == 'NPC' and distanceToReference <= range
     end)
     
-
     return mobsInRange  -- Return the list of mobs in range
 end
 

@@ -129,7 +129,7 @@ local function returnToCampIfNeeded()
 
         -- Navigate back to camp if beyond threshold
         if distanceToCamp > 50 then
-            mq.cmdf("/nav loc %f %f %f", campY, campX, campZ)
+            mq.cmdf("/squelch /nav loc %f %f %f", campY, campX, campZ)
             while mq.TLO.Navigation.Active() do
                 mq.delay(50)
             end
@@ -152,7 +152,7 @@ local function updateAggroQueue()
             table.remove(aggroQueue, i)  -- Remove dead or nonexistent mob
         else
             -- Target the mob to check aggro
-            mq.cmdf("/target id %d", mobID)
+            mq.cmdf("/squelch /target id %d", mobID)
             mq.delay(10)  -- Small delay to allow targeting
 
             -- Verify mob is still the target and has aggro
@@ -189,10 +189,10 @@ local function pullTarget()
     end
 
     local target = pullQueue[1]
-    mq.cmd("/attack off")
+    mq.cmd("/squelch /attack off")
     mq.delay(100)
 
-    mq.cmdf("/target id %d", target.ID())
+    mq.cmdf("/squelch /target id %d", target.ID())
     mq.delay(200, function() return mq.TLO.Target.ID() == target.ID() end)
 
     if mq.TLO.Target() and mq.TLO.Target.ID() ~= target.ID() then
@@ -215,14 +215,14 @@ local function pullTarget()
         return
     end
 
-    mq.cmdf("/nav id %d", target.ID())
+    mq.cmdf("/squelch /nav id %d", target.ID())
     mq.delay(50, function() return mq.TLO.Navigation.Active() end)
 
     while mq.TLO.Target() and mq.TLO.Navigation.Active() do
         -- Check if pullOn was unchecked during navigation
         if not gui.pullOn then
             print("Pulling stopped: pullOn was unchecked.")
-            mq.cmd("/nav stop")  -- Stop navigation
+            mq.cmd("/squelch /nav stop")  -- Stop navigation
             return
         end
 
@@ -236,7 +236,7 @@ local function pullTarget()
             end
 
             if mq.TLO.Target() and distance <= pullRange and distance > 40 and mq.TLO.Target.LineOfSight() then
-                mq.cmd("/nav stop")
+                mq.cmd("/squelch /nav stop")
                 mq.delay(200)
             end
         else
@@ -257,7 +257,7 @@ local function pullTarget()
                     print("Error: pullability is nil. Check if the ability ID is correctly set.")
                     return
                 end
-                mq.cmdf("/alt act %s", pullability)
+                mq.cmdf("/squelch /alt act %s", pullability)
 
                 local timeout = os.time() + 2
                 while mq.TLO.Target() and mq.TLO.Target.PctAggro() <= 0 do
@@ -356,75 +356,74 @@ local function checkHealthAndBuff()
 end
 
 local function pullRoutine()
-    checkHealthAndBuff()
-
-    if gui.botOn and gui.pullOn then
-        if gui.pullPause and os.difftime(os.time(), pullPauseTimer) >= (gui.pullPauseTimer * 60) then
-            if utils.isInCamp() then
-                print("Pull routine paused for " .. gui.pullPauseDuration .. " minutes.")
-                mq.delay(gui.pullPauseDuration * 60 * 1000)  -- Pause timer
-
-                aggroQueue = {}
-                updateAggroQueue()
-
-                pullPauseTimer = os.time()  -- Reset the timer
-            end
-        end
-
-        -- Check if nav.campLocation exists and has a valid zone
-        if not nav.campLocation or not nav.campLocation.zone or nav.campLocation.zone == "unknown" then
-            print("Camp location is not set. Aborting pull routine.")
-            return
-        end
-        
-        -- Check if the current zone matches camp zone
-        if zone ~= nav.campLocation.zone or zone == "unknown" or zone == "nil" or zone == "" then
-            print("Current zone does not match camp zone. Aborting pull routine.")
-            return
-        end
-        
-        gui.campQueue = utils.referenceLocation(gui.campSize) or {}
-        campQueueCount = #gui.campQueue  -- Update campQueueCount to track mob count
-
-        aggroQueue = aggroQueue or {}
-        updateAggroQueue()
-
-        local targetCampAmount = gui.keepMobsInCampAmount or 1
-
-        local pullCondition
-        if gui.keepMobsInCamp then
-            pullCondition = function() return campQueueCount < targetCampAmount and #aggroQueue == 0 end
-        else
-            pullCondition = function() return campQueueCount == 0 and #aggroQueue == 0 end
-        end
-
-        while pullCondition() do
-            -- Check if pullOn was unchecked during the routine
-            if not gui.pullOn then
-                print("Pulling stopped: pullOn was unchecked.")
-                mq.cmd("/nav stop")  -- Stop any active navigation
-                return
-            end
-
-            local groupStatusOk = checkGroupMemberStatus()
-            if not groupStatusOk then
-                break
-            end
-
-            updatePullQueue()
-            if #pullQueue > 0 then
-                pullTarget()
-
-                gui.campQueue = utils.referenceLocation(gui.campSize) or {}
-                campQueueCount = #gui.campQueue  -- Refresh campQueueCount after updating campQueue
-
-                updateAggroQueue()
-            else
-                break
-            end
-        end
-    else
+    if not gui.botOn and gui.pullOn then
         return
+    end
+    checkHealthAndBuff()
+    if gui.pullPause and os.difftime(os.time(), pullPauseTimer) >= (gui.pullPauseTimer * 60) then
+        if utils.isInCamp() then
+            print("Pull routine paused for " .. gui.pullPauseDuration .. " minutes.")
+            mq.delay(gui.pullPauseDuration * 60 * 1000)  -- Pause timer
+
+            aggroQueue = {}
+            updateAggroQueue()
+
+            pullPauseTimer = os.time()  -- Reset the timer
+        end
+    end
+    -- Check if nav.campLocation exists and has a valid zone
+    if not nav.campLocation or not nav.campLocation.zone or nav.campLocation.zone == "nil" then
+        print("Camp location is not set. Aborting pull routine.")
+        return
+    end
+    
+    -- Check if the current zone matches camp zone
+    if zone == nav.campLocation.zone then
+        print("Current zone matches camp zone. Proceeding with pull routine.")
+    else
+        print("Current zone does not match camp zone. Aborting pull routine.")
+        return
+    end
+    
+    gui.campQueue = utils.referenceLocation(gui.campSize) or {}
+    campQueueCount = #gui.campQueue  -- Update campQueueCount to track mob count
+
+    aggroQueue = aggroQueue or {}
+    updateAggroQueue()
+
+    local targetCampAmount = gui.keepMobsInCampAmount or 1
+
+    local pullCondition
+    if gui.keepMobsInCamp then
+        pullCondition = function() return campQueueCount < targetCampAmount and #aggroQueue == 0 end
+    else
+        pullCondition = function() return campQueueCount == 0 and #aggroQueue == 0 end
+    end
+
+    while pullCondition() do
+        -- Check if pullOn was unchecked during the routine
+        if not gui.pullOn then
+            print("Pulling stopped: pullOn was unchecked.")
+            mq.cmd("/squelch /nav stop")  -- Stop any active navigation
+            return
+        end
+
+        local groupStatusOk = checkGroupMemberStatus()
+        if not groupStatusOk then
+            break
+        end
+
+        updatePullQueue()
+        if #pullQueue > 0 then
+            pullTarget()
+
+            gui.campQueue = utils.referenceLocation(gui.campSize) or {}
+            campQueueCount = #gui.campQueue  -- Refresh campQueueCount after updating campQueue
+
+            updateAggroQueue()
+        else
+            break
+        end
     end
 end
 
