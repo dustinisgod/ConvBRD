@@ -8,8 +8,8 @@ local config = {}
 
 local gui = {}
 
-
-local runReferenceLocationOnce = false
+local previouscampSize = gui.campSize
+local previouspullDistanceXY = gui.pullDistanceXY
 
 gui.isOpen = true
 
@@ -435,11 +435,19 @@ local function controlGUI()
             ImGui.Spacing()
             ImGui.SetNextItemWidth(100)
             gui.campSize = ImGui.SliderInt("Camp Size", gui.campSize, 20, 100)
-
+        -- Check if the tank range has changed
+        if gui.campSize ~= previouscampSize then
+            mq.cmdf('/mapfilter spellradius %s', gui.campSize)
+            previouscampSize = gui.campSize
+        end
             ImGui.Spacing()
             ImGui.SetNextItemWidth(100)
             gui.pullDistanceXY = ImGui.SliderInt("Pull Distance", gui.pullDistanceXY, 5, 4000)
-
+        -- Check if the tank range has changed
+        if gui.pullDistanceXY ~= previouspullDistanceXY then
+            mq.cmdf('/mapfilter castradius %s', gui.pullDistanceXY)
+            previouspullDistanceXY = gui.pullDistanceXY
+        end
             ImGui.Spacing()
             ImGui.SetNextItemWidth(100)
             gui.pullDistanceZ = ImGui.SliderInt("Max Z", gui.pullDistanceZ, 5, 1000)
