@@ -221,7 +221,6 @@ local function pullTarget()
     while mq.TLO.Target() and mq.TLO.Navigation.Active() do
         -- Check if pullOn was unchecked during navigation
         if not gui.pullOn then
-            print("Pulling stopped: pullOn was unchecked.")
             mq.cmd("/squelch /nav stop")  -- Stop navigation
             return
         end
@@ -379,7 +378,6 @@ local function pullRoutine()
     
     -- Check if the current zone matches camp zone
     if zone == nav.campLocation.zone then
-        print("Current zone matches camp zone. Proceeding with pull routine.")
     else
         print("Current zone does not match camp zone. Aborting pull routine.")
         return
@@ -403,7 +401,6 @@ local function pullRoutine()
     while pullCondition() do
         -- Check if pullOn was unchecked during the routine
         if not gui.pullOn then
-            print("Pulling stopped: pullOn was unchecked.")
             mq.cmd("/squelch /nav stop")  -- Stop any active navigation
             return
         end
