@@ -49,16 +49,6 @@ local function returnChaseToggle()
         nav.clearCamp()
         toggleboton = false
     end
-
-    -- Check if pullOn has changed state and return-to-camp is enabled, only set camp if needed
-    if gui.pullOn ~= lastPullOnState then
-        lastPullOnState = gui.pullOn
-        if gui.pullOn and gui.returnToCamp then
-            nav.setCamp()
-        elseif not gui.pullOn then
-            nav.clearCamp()
-        end
-    end
 end
 
 
@@ -71,11 +61,11 @@ while gui.controlGUI do
 
     if gui.botOn then
 
+        utils.monitorNav()
+
         if gui.singSongs then
             utils.twistSongMonitor()
         end
-
-        utils.monitorNav()
 
         if gui.pullOn then
             pull.pullRoutine()

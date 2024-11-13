@@ -87,13 +87,13 @@ function spells.loadDefaultSpells(charLevel)
         defaultSpells[3] = spells.findBestSpell("Regen", charLevel)
     end
     if charLevel >= 17 then
-    defaultSpells[4] = spells.findBestSpell("MrBuff", charLevel)
+        defaultSpells[4] = spells.findBestSpell("MrBuff", charLevel)
     end
-    if gui.resistFireCold and charLevel >= 9 then
-        defaultSpells[5] = spells.findBestSpell("resistFireCold", charLevel)
-    elseif gui.ResistancePoisonDisease and charLevel >= 13 then
+    if gui.singFireColdResist and charLevel >= 9 then
+        defaultSpells[5] = spells.findBestSpell("ResistanceFireCold", charLevel)
+    elseif gui.singDiseasePoisonResist and charLevel >= 13 then
         defaultSpells[5] = spells.findBestSpell("ResistancePoisonDisease", charLevel)
-    elseif gui.absorb and charLevel >= 41 then
+    elseif gui.singMagicResist and charLevel >= 41 then
         defaultSpells[5] = spells.findBestSpell("Absorb", charLevel)
     end
     if charLevel >= 20 then
