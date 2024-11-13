@@ -37,8 +37,6 @@ local function checkBotOn(currentLevel)
 end
 
 local toggleboton = false
-local lastPullOnState = false
-
 local function returnChaseToggle()
     -- Check if bot is on and return-to-camp is enabled, and only set camp if toggleboton is false
     if gui.botOn and gui.returnToCamp and not toggleboton then

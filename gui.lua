@@ -120,7 +120,6 @@ local function checkBotOnToggle()
     previousbotOn = gui.botOn
 end
 
-
 local function controlGUI()
     gui.isOpen, _ = ImGui.Begin("Convergence Bard", gui.isOpen, 2)
 
