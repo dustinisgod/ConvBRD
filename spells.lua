@@ -80,8 +80,6 @@ function spells.loadDefaultSpells(charLevel)
     end
     if gui.meleeGroup and charLevel >= 10 then
         defaultSpells[2] = spells.findBestSpell("Haste", charLevel)
-    elseif gui.casterGroup and charLevel >= 44 then
-        defaultSpells[2] = spells.findBestSpell("IntWisBuff", charLevel)
     end
     if charLevel >= 6 then
         defaultSpells[3] = spells.findBestSpell("Regen", charLevel)
@@ -89,21 +87,25 @@ function spells.loadDefaultSpells(charLevel)
     if charLevel >= 17 then
         defaultSpells[4] = spells.findBestSpell("MrBuff", charLevel)
     end
-    if gui.singFireColdResist and charLevel >= 9 then
+    if not gui.singDiseasePoisonResist and charLevel >= 9 then
         defaultSpells[5] = spells.findBestSpell("ResistanceFireCold", charLevel)
     elseif gui.singDiseasePoisonResist and charLevel >= 13 then
         defaultSpells[5] = spells.findBestSpell("ResistancePoisonDisease", charLevel)
-    elseif gui.singMagicResist and charLevel >= 41 then
-        defaultSpells[5] = spells.findBestSpell("Absorb", charLevel)
+    end
+    if gui.singMagicResist and charLevel >= 41 then
+        defaultSpells[6] = spells.findBestSpell("Absorb", charLevel)
     end
     if charLevel >= 20 then
-        defaultSpells[6] = spells.findBestSpell("Slow", charLevel)
+        defaultSpells[7] = spells.findBestSpell("Slow", charLevel)
+    end
+    if charLevel >= 44 then
+        defaultSpells[8] = spells.findBestSpell("IntWisBuff", charLevel)
     end
     if charLevel >= 53 then
-        defaultSpells[7] = spells.findBestSpell("ReduceHate", charLevel)
+        defaultSpells[9] = spells.findBestSpell("ReduceHate", charLevel)
     end
     if charLevel >= 15 then
-        defaultSpells[8] = spells.findBestSpell("Mez", charLevel)
+        defaultSpells[10] = spells.findBestSpell("Mez", charLevel)
     end
     return defaultSpells
 end

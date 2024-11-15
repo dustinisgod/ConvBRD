@@ -251,7 +251,7 @@ function utils.twistSongMonitor()
 
     -- Build the twist list for slots 1-5 based on conditions
     -- Spellgem 1
-    if charLevel >= 5 and gui.singRunSpeed then
+    if gui.singRunSpeed and charLevel >= 5 then
         table.insert(twistList, 1)
     end
 
@@ -264,14 +264,16 @@ function utils.twistSongMonitor()
             spells.loadAndMemorizeSpell("Haste", charLevel, 2)
         end
         table.insert(twistList, 2)
+
+    -- Spellgem 8
     elseif gui.casterGroup and charLevel >= 44 then
         local bestSpell = spells.findBestSpell("IntWisBuff", charLevel)
-        if mq.TLO.Me.Gem(2).Name() ~= bestSpell then
+        if mq.TLO.Me.Gem(8).Name() ~= bestSpell then
             mq.cmd("/twist stop")
             mq.delay(100)
-            spells.loadAndMemorizeSpell("IntWisBuff", charLevel, 2)
+            spells.loadAndMemorizeSpell("IntWisBuff", charLevel, 8)
         end
-        table.insert(twistList, 2)
+        table.insert(twistList, 8)
     end
 
     -- Spellgem 3
@@ -300,15 +302,26 @@ function utils.twistSongMonitor()
             mq.delay(100)
             spells.loadAndMemorizeSpell("ResistancePoisonDisease", charLevel, 5)
         end
-        table.insert(twistList, 5)
+    -- Spellgem 6
+        table.insert(twistList, 6)
     elseif gui.singMagicResist and charLevel >= 41 then
         local bestSpell = spells.findBestSpell("Absorb", charLevel)
-        if mq.TLO.Me.Gem(5).Name() ~= bestSpell then
+        if mq.TLO.Me.Gem(6).Name() ~= bestSpell then
             mq.cmd("/twist stop")
             mq.delay(100)
-            spells.loadAndMemorizeSpell("Absorb", charLevel, 5)
+            spells.loadAndMemorizeSpell("Absorb", charLevel, 6)
         end
-        table.insert(twistList, 5)
+        table.insert(twistList, 6)
+    -- Spellgem 7
+    elseif gui.singSlow and charLevel >= 20 then
+        local bestSpell = spells.findBestSpell("Slow", charLevel)
+        if mq.TLO.Me.Gem(7).Name() ~= bestSpell then
+            mq.cmd("/twist stop")
+            mq.delay(100)
+            spells.loadAndMemorizeSpell("Slow", charLevel, 7)
+        end
+        table.insert(twistList, 7)
+
     end
 
     -- Check if the character is currently twisting and if the twist list matches

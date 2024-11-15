@@ -74,7 +74,7 @@ function assist.assistRoutine()
         if mq.TLO.Target() and gui.singSongs and gui.singAgroReduction and charLevel >= 53 and mq.TLO.Me.PctAggro() >= 80 and mq.TLO.Target.Distance() <= gui.assistRange then
             mq.cmd("/squelch /twist off")
             mq.delay(200)
-            mq.cmd("/squelch /cast 7")
+            mq.cmd("/squelch /cast 9")
             while mq.TLO.Target() and mq.TLO.Me.PctAggro() > 80 and mq.TLO.Target.AggroHolder() do
                 mq.delay(10)
             end
