@@ -133,7 +133,7 @@ function mez.mezRoutine()
             end
 
             -- Attempt to cast mez
-            if not mq.TLO.Target.Mezzed() or (mq.TLO.Target.Mezzed() and mq.TLO.Target.Mezzed.Duration() < MEZ_RECHECK_THRESHOLD) then
+            if mq.TLO.Target.ID() and not mq.TLO.Target.Mezzed() or (mq.TLO.Target.Mezzed() and mq.TLO.Target.Mezzed.Duration() < MEZ_RECHECK_THRESHOLD) then
                 if mq.TLO.Twist() == "TRUE" then
                     debugPrint("Twist off for mezzing.")
                     mq.cmd("/squelch /twist off")
@@ -157,7 +157,7 @@ function mez.mezRoutine()
                         mq.cmd("/squelch /stopcast")
                         debugPrint("Casting interrupted: Range: " .. mq.TLO.Target.Distance() .. " HP%: " .. mq.TLO.Target.PctHPs())
                         break
-                    elseif mq.TLO.Target.Mezzed() and mq.TLO.Target.Mezzed.Duration() > MEZ_RECHECK_THRESHOLD then
+                    elseif mq.TLO.Target.ID() and mq.TLO.Target.Mezzed() and mq.TLO.Target.Mezzed.Duration() > MEZ_RECHECK_THRESHOLD then
                         mq.cmd("/squelch /stopcast")
                         updateMezStatus(mobID, mq.TLO.Target.Mezzed.Duration() / 1000)
                         mezSuccessful = true
@@ -170,14 +170,14 @@ function mez.mezRoutine()
 
                 mq.delay(100)
 
-                if mq.TLO.Target.Mezzed() and mq.TLO.Target.Mezzed.Duration() > MEZ_RECHECK_THRESHOLD then
+                if mq.TLO.Target.ID() and mq.TLO.Target.Mezzed() and mq.TLO.Target.Mezzed.Duration() > MEZ_RECHECK_THRESHOLD then
                 updateMezStatus(mobID, mq.TLO.Target.Mezzed.Duration() / 1000)
                 debugPrint("Mez successful on second check.")
                 mezSuccessful = true
                 break
                 end
 
-            elseif mq.TLO.Target.Mezzed() and mq.TLO.Target.Mezzed.Duration() > MEZ_RECHECK_THRESHOLD then
+            elseif mq.TLO.Target.ID() and mq.TLO.Target.Mezzed() and mq.TLO.Target.Mezzed.Duration() > MEZ_RECHECK_THRESHOLD then
                 updateMezStatus(mobID, mq.TLO.Target.Mezzed.Duration() / 1000)
                 debugPrint("Mez successful on second check.")
                 mezSuccessful = true

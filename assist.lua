@@ -43,10 +43,14 @@ function assist.assistRoutine()
         if gui.stickFront then
             mq.cmd('/squelch /nav stop')
             mq.delay(100)
+            mq.cmd("/stick moveback 0")
+            mq.delay(100)
             mq.cmdf("/squelch /stick front %d uw", gui.stickDistance)
             mq.delay(100)
         elseif gui.stickBehind then
             mq.cmd('/squelch /nav stop')
+            mq.delay(100)
+            mq.cmd("/stick moveback 0")
             mq.delay(100)
             mq.cmdf("/squelch /stick behind %d uw", gui.stickDistance)
             mq.delay(100)
@@ -86,10 +90,10 @@ function assist.assistRoutine()
             local upperBound = stickDistance * 1.1
             local targetDistance = mq.TLO.Target.Distance()
         
-            if targetDistance > upperBound then
+            if mq.TLO.Target.ID() and targetDistance > upperBound then
                 mq.cmdf("/squelch /stick moveback %s", stickDistance)
                 mq.delay(100)
-            elseif targetDistance < lowerBound then
+            elseif mq.TLO.Target.ID() and targetDistance < lowerBound then
                 mq.cmdf("/squelch /stick moveback %s", stickDistance)
                 mq.delay(100)
             end
