@@ -295,16 +295,21 @@ function utils.twistSongMonitor()
             spells.loadAndMemorizeSpell("ResistanceFireCold", charLevel, 5)
         end
         table.insert(twistList, 5)
-    elseif gui.singDiseasePoisonResist and charLevel >= 13 then
+    end
+    
+    if gui.singDiseasePoisonResist and charLevel >= 13 then
         local bestSpell = spells.findBestSpell("ResistancePoisonDisease", charLevel)
         if mq.TLO.Me.Gem(5).Name() ~= bestSpell then
             mq.cmd("/twist stop")
             mq.delay(100)
             spells.loadAndMemorizeSpell("ResistancePoisonDisease", charLevel, 5)
         end
+        table.insert(twistList, 5)
+    end
+
     -- Spellgem 6
-        table.insert(twistList, 6)
-    elseif gui.singMagicResist and charLevel >= 41 then
+
+    if gui.singMagicResist and charLevel >= 41 then
         local bestSpell = spells.findBestSpell("Absorb", charLevel)
         if mq.TLO.Me.Gem(6).Name() ~= bestSpell then
             mq.cmd("/twist stop")
@@ -312,8 +317,10 @@ function utils.twistSongMonitor()
             spells.loadAndMemorizeSpell("Absorb", charLevel, 6)
         end
         table.insert(twistList, 6)
+    end
+
     -- Spellgem 7
-    elseif gui.singSlow and charLevel >= 20 then
+    if gui.singSlow and charLevel >= 20 then
         local bestSpell = spells.findBestSpell("Slow", charLevel)
         if mq.TLO.Me.Gem(7).Name() ~= bestSpell then
             mq.cmd("/twist stop")
