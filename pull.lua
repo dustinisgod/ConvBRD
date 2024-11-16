@@ -4,6 +4,14 @@ local utils = require('utils')
 local nav = require('nav')
 local corpsedrag = require('corpsedrag')
 
+local DEBUG_MODE = true
+-- Debug print helper function
+local function debugPrint(...)
+    if DEBUG_MODE then
+        print(...)
+    end
+end
+
 local pullQueue = {}
 local campQueue = {}
 local aggroQueue = {}  -- New queue to track mobs on their way to camp
@@ -66,6 +74,7 @@ local function updatePullQueue()
 
         -- Check if spawn's name is in the pull ignore list
         if utils.pullConfig[cleanName] then
+            debugPrint("Ignoring pull for:", cleanName)
             goto continue
         end
 
@@ -84,10 +93,12 @@ local function updatePullQueue()
     -- Add the best target to the pullQueue if one is found
     if bestTarget then
         table.insert(pullQueue, bestTarget)
+        debugPrint("Added target to pullQueue:", bestTarget.Name())
     end
 
     -- Sort pullQueue by distance
     table.sort(pullQueue, function(a, b) return a.Distance() < b.Distance() end)
+    debugPrint("Updated pullQueue:", #pullQueue)
 end
 
 local function isGroupOrRaidMember(memberName)
@@ -384,6 +395,7 @@ local function pullRoutine()
     
     -- Check if the current zone matches camp zone
     if zone == nav.campLocation.zone then
+        debugPrint("zone: ", zone, " camp zone: ", nav.campLocation.zone)
     else
         print("Current zone does not match camp zone. Aborting pull routine.")
         return
