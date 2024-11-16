@@ -345,12 +345,18 @@ local function checkHealthAndBuff()
     local healthPct = mq.TLO.Me.PctHPs()
     local rooted = mq.TLO.Me.Rooted()
 
-    if not shownMessage and (hasRezSickness or healthPct < 70 or rooted) then
-        print("Cannot pull: Either rez sickness is present or health is below 70%.")
-        shownMessage = true  -- Set the flag to avoid repeating the message
-    elseif shownMessage and healthPct >= 70 then
-        -- Reset the flag when health is back above 70%
+    if not shownMessage and healthPct < 70  then
+        print("Cannot pull: Health is below 70%.")
+        shownMessage = true
+    elseif shownMessage and hasRezSickness == "Revival Sickness" then
+        print("Cannot pull: Revival Sickness is active.")
+        shownMessage = true
+    elseif shownMessage and rooted then
+        print("Cannot pull: Rooted.")
+        shownMessage = true
+    else
         shownMessage = false
+        return true
     end
 end
 
