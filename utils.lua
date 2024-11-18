@@ -11,10 +11,10 @@ utils.IsUsingCast = true
 utils.IsUsingMelee = false
 
 utils.mezConfig = {}
-local mezConfigPath = mq.configDir .. '/' .. 'ConvBRD_mez_ignore_list.lua'
+local mezConfigPath = mq.configDir .. '/' .. 'Conv_mez_ignore_list.lua'
 
 utils.pullConfig = {}
-local pullConfigPath = mq.configDir .. '/' .. 'ConvBRD_pull_ignore_list.lua'
+local pullConfigPath = mq.configDir .. '/' .. 'Conv_pull_ignore_list.lua'
 
 local charLevel = mq.TLO.Me.Level()
 
