@@ -61,6 +61,10 @@ local function setPullOnOff(value)
     end
 end
 local function setPullPause(value) setToggleOption("pullPause", value, "Pull Pause") end
+local function setPullNorth(value) setToggleOption("pullNorth", value, "Pull North") end
+local function setPullSouth(value) setToggleOption("pullSouth", value, "Pull South") end
+local function setPullWest(value) setToggleOption("pullWest", value, "Pull West") end
+local function setPullEast(value) setToggleOption("pullEast", value, "Pull East") end
 
 -- Numeric Commands
 local function setMezRadius(value) setNumericOption("mezRadius", value, "MezRadius") end
@@ -353,6 +357,14 @@ local function commandHandler(command, ...)
         setMezAmount(args[1])
     elseif command == "pull" then
         setPullOnOff(args[1])
+    elseif command == "pullnorth" then
+        setPullNorth(args[1])
+    elseif command == "pullsouth" then
+        setPullSouth(args[1])
+    elseif command == "pullwest" then
+        setPullWest(args[1])
+    elseif command == "pulleast" then
+        setPullEast(args[1])
     elseif command == "pullamount" then
         setPullAmount(args[1])
     elseif command == "pulldistance" then

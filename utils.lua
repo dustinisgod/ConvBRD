@@ -3,6 +3,14 @@ local gui = require('gui')
 local nav = require('nav')
 local spells = require('spells')
 
+local DEBUG_MODE = false
+-- Debug print helper function
+local function debugPrint(...)
+    if DEBUG_MODE then
+        print(...)
+    end
+end
+
 local utils = {}
 
 utils.IsUsingDanNet = true
@@ -71,6 +79,57 @@ function utils.isTargetInCampQueue(targetID)
     return false
 end
 
+local mq = require('mq')
+
+-- Function to find and equip the best percussion instrument
+local function equipBestPercussionInstrument()
+    local bestInstrument = nil
+    local highestModifier = 0
+
+    -- Iterate through all inventory slots (0-31 for main inventory and bags)
+    for slot = 0, 31 do
+        local item = mq.TLO.Me.Inventory(slot)
+        if item() then
+            -- Check if the item is a percussion instrument
+            if item.Type() == "Percussion Instrument" then
+                local modifier = item.InstrumentMod() or 0
+                if modifier > highestModifier then
+                    bestInstrument = item
+                    highestModifier = modifier
+                end
+            end
+        end
+    end
+
+    if not bestInstrument then
+        print("No percussion instrument found.")
+        return nil
+    end
+
+    debugPrint("Best percussion instrument:", bestInstrument.Name())
+    return bestInstrument.Name()
+end
+
+-- Function to use Selo's Sonata with the best percussion instrument
+function utils.useSeloWithPercussion()
+    local sonata = "Selo's Sonata"
+    if gui.singRunSpeed and (not mq.TLO.Me.Buff(sonata)() or mq.TLO.Me.Buff(sonata).Duration() < 5) then
+        local bestInstrument = equipBestPercussionInstrument()
+        if bestInstrument then
+            -- Swap the item into the offhand slot
+            mq.cmdf('/exchange "%s" offhand', bestInstrument)
+            mq.delay(200)
+            
+            -- Activate Selo's Sonata
+            mq.cmd("/alt act 3704")
+        else
+            print("Failed to equip a percussion instrument.")
+        end
+    else
+        return
+    end
+end
+
 local lastNavTime = 0
 
 function utils.monitorNav()
@@ -97,11 +156,15 @@ end
 
 function utils.assistMonitor()
     local assist = require('assist')
+    
     if gui.botOn then
+        -- If `gui.pullOn` is not enabled, just run the assist routine
         if not gui.pullOn then
-            assist.assistRoutine()
             return
         end
+
+        -- Ensure `gui.campQueue` is initialized as a table
+        gui.campQueue = gui.campQueue or {}
 
         -- Check campQueue requirements if pulling is enabled
         local campQueueSize = #gui.campQueue
@@ -109,12 +172,12 @@ function utils.assistMonitor()
         -- If `gui.keepMobsInCamp` is checked, ensure campQueue has at least `keepMobsInCampAmount` mobs
         if gui.keepMobsInCamp then
             if campQueueSize >= gui.keepMobsInCampAmount then
-                assist.assistRoutine()
+                return
             end
         else
             -- Otherwise, ensure campQueue has at least 1 mob if `gui.pullOn` is enabled
             if campQueueSize >= 1 then
-                assist.assistRoutine()
+                return
             end
         end
     else
@@ -249,13 +312,7 @@ function utils.twistSongMonitor()
     -- Initialize the twist list
     local twistList = {}
 
-    -- Build the twist list for slots 1-5 based on conditions
-    -- Spellgem 1
-    local sonata = "Selo's Sonata"
-    if gui.singRunSpeed and not mq.TLO.Me.Buff(sonata)() then
-        mq.cmd("/alt act 3704")
-        mq.delay(100)
-    end
+    utils.useSeloWithPercussion()
 
     -- Spellgem 2
     if gui.meleeGroup and charLevel >= 10 then

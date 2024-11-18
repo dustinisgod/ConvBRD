@@ -60,6 +60,11 @@ local function setDefaultConfig()
     gui.groupWatchSHMMana = 10
     gui.groupWatchENC = false
     gui.groupWatchENCMana = 10
+    gui.pullNorth = false
+    gui.pullEast = false
+    gui.pullSouth = false
+    gui.pullWest = false
+
 end
 
 function gui.getPullDistanceXY()
@@ -461,6 +466,16 @@ local function controlGUI()
                     print("Error: No target selected. Please target a mob to remove it from the global pull ignore list.")
                 end
             end
+
+            ImGui.Spacing()
+            
+            gui.pullNorth = ImGui.Checkbox("Pull North", gui.pullNorth)
+            ImGui.SameLine()
+            gui.pullEast = ImGui.Checkbox("Pull East", gui.pullEast)
+            ImGui.SameLine()
+            gui.pullSouth = ImGui.Checkbox("Pull South", gui.pullSouth)
+            ImGui.SameLine()
+            gui.pullWest = ImGui.Checkbox("Pull West", gui.pullWest)
 
             ImGui.Spacing()
             ImGui.SetNextItemWidth(100)

@@ -84,20 +84,34 @@ function assist.assistRoutine()
             end
         end
 
+        utils.useSeloWithPercussion()
+
+        local lastStickDistance = nil
+
         if mq.TLO.Target() and mq.TLO.Stick() == "ON" then
-            local stickDistance = gui.stickDistance
+            local stickDistance = gui.stickDistance -- current GUI stick distance
             local lowerBound = stickDistance * 0.9
             local upperBound = stickDistance * 1.1
             local targetDistance = mq.TLO.Target.Distance()
-        
-            if mq.TLO.Target.ID() and targetDistance > upperBound then
+            
+            -- Check if stickDistance has changed
+            if lastStickDistance ~= stickDistance then
+                lastStickDistance = stickDistance
                 mq.cmdf("/squelch /stick moveback %s", stickDistance)
-                mq.delay(100)
-            elseif mq.TLO.Target.ID() and targetDistance < lowerBound then
-                mq.cmdf("/squelch /stick moveback %s", stickDistance)
-                mq.delay(100)
+            end
+    
+            -- Check if the target distance is out of bounds and adjust as necessary
+            if mq.TLO.Target.ID() then
+                if targetDistance > upperBound then
+                    mq.cmdf("/squelch /stick moveback %s", stickDistance)
+                    mq.delay(100)
+                elseif targetDistance < lowerBound then
+                    mq.cmdf("/squelch /stick moveback %s", stickDistance)
+                    mq.delay(100)
+                end
             end
         end
+        
         mq.delay(50)
     end
 end
