@@ -60,7 +60,6 @@ local function setDefaultConfig()
     gui.groupWatchSHMMana = 10
     gui.groupWatchENC = false
     gui.groupWatchENCMana = 10
-    gui.corpseDrag = false
 end
 
 function gui.getPullDistanceXY()
@@ -547,16 +546,6 @@ local function controlGUI()
                 end
             end
         end
-    end
-
-    ImGui.Spacing()
-        if ImGui.CollapsingHeader("Misc Settings") then
-
-            ImGui.Spacing()
-        
-            gui.corpseDrag = ImGui.Checkbox("Corpse Drag", gui.corpseDrag or false)
-
-            ImGui.Spacing()
     end
 
     ImGui.End()
