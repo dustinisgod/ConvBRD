@@ -3,10 +3,6 @@ local gui = require('gui')
 
 local spells = {
 
-    RunSpeed = {
-        {level = 49, name = "Selo's Accelerating Chorus"},      --runspeed 2m
-        {level = 5, name = "Selo's Accelerando"}                --runspeed 12s
-    },
     Haste = {
 
         {level = 57, name = "McVaxius' Rousing Rondo"},         --haste/str/atk/dmgshield
@@ -75,9 +71,6 @@ end
 function spells.loadDefaultSpells(charLevel)
     local defaultSpells = {}
 
-    if charLevel >= 5 then
-        defaultSpells[1] = spells.findBestSpell("RunSpeed", charLevel)
-    end
     if gui.meleeGroup and charLevel >= 10 then
         defaultSpells[2] = spells.findBestSpell("Haste", charLevel)
     end

@@ -251,8 +251,10 @@ function utils.twistSongMonitor()
 
     -- Build the twist list for slots 1-5 based on conditions
     -- Spellgem 1
-    if gui.singRunSpeed and charLevel >= 5 then
-        table.insert(twistList, 1)
+    local sonata = "Selo's Sonata"
+    if gui.singRunSpeed and not mq.TLO.Me.Buff(sonata)() then
+        mq.cmd("/alt act 3704")
+        mq.delay(100)
     end
 
     -- Spellgem 2
