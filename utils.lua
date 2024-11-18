@@ -17,6 +17,7 @@ utils.IsUsingDanNet = true
 utils.IsUsingTwist = true
 utils.IsUsingCast = true
 utils.IsUsingMelee = false
+utils.IsUsingExchange = true
 
 utils.mezConfig = {}
 local mezConfigPath = mq.configDir .. '/' .. 'Conv_mez_ignore_list.lua'
@@ -52,6 +53,12 @@ function utils.PluginCheck()
             if mq.TLO.Plugin('mq2melee').IsLoaded() then
                 printf("Plugin \ayMQ2Melee\ax is not recommended. Unloading it now.")
                 mq.cmd('/plugin mq2melee unload')
+            end
+        end
+        if not utils.IsUsingExchange then
+            if mq.TLO.Plugin('mq2exchange').IsLoaded() then
+                printf("Plugin \ayMQ2Exchange\ax is required. Loading it now.")
+                mq.cmd('/plugin mq2exchange noauto')
             end
         end
     end
