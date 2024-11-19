@@ -410,20 +410,43 @@ end
 local shownMessage = false  -- Flag to track if the message has been shown
 
 -- Main check function to run periodically
-local function checkHealthAndBuff()
+local function checkHealthAndBuffAndAssist()
     local hasRezSickness = mq.TLO.Me.Buff("Revival Sickness")()
     local healthPct = mq.TLO.Me.PctHPs()
     local rooted = mq.TLO.Me.Rooted()
-
-    if not shownMessage and healthPct < 70  then
-        print("Cannot pull: Health is below 70%.")
-        shownMessage = true
-    elseif shownMessage and hasRezSickness == "Revival Sickness" then
-        print("Cannot pull: Revival Sickness is active.")
-        shownMessage = true
-    elseif shownMessage and rooted then
-        print("Cannot pull: Rooted.")
-        shownMessage = true
+    local deadMA = mq.TLO.Spawn(gui.mainAssist).Dead()
+    local maID = tostring(mq.TLO.Spawn(gui.mainAssist).ID())
+    
+    if healthPct < 70  then
+        if not shownMessage then
+            print("Cannot pull: Health is below 70%.")
+            shownMessage = true
+        end
+        return false
+    elseif hasRezSickness == "Revival Sickness" then
+        if not shownMessage then
+            print("Cannot pull: Revival Sickness is active.")
+            shownMessage = true
+        end
+        return false
+    elseif rooted then
+        if not shownMessage then
+            print("Cannot pull: Rooted.")
+            shownMessage = true
+        end
+        return false
+    elseif deadMA then
+        if not shownMessage then
+            print("Cannot pull: Main assist is dead.")
+            shownMessage = true
+        end
+        return false
+    elseif maID == "0" then
+        if not shownMessage then
+            print("Cannot pull: Main assist does not exist.")
+            shownMessage = true
+        end
+        return false
     else
         shownMessage = false
         return true
@@ -435,7 +458,11 @@ local function pullRoutine()
         debugPrint("Bot is off. Exiting pull routine.")
         return
     end
-    checkHealthAndBuff()
+
+    if not checkHealthAndBuffAndAssist() then
+        return
+    end
+
     if gui.pullPause and os.difftime(os.time(), pullPauseTimer) >= (gui.pullPauseTimer * 60) then
         if utils.isInCamp() then
             debugPrint("Pull routine paused for " .. gui.pullPauseDuration .. " minutes.")

@@ -50,7 +50,6 @@ local function returnChaseToggle()
     end
 end
 
-
 utils.loadPullConfig()
 utils.loadMezConfig()
 
