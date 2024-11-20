@@ -3,7 +3,7 @@ local gui = require('gui')
 local nav = require('nav')
 local spells = require('spells')
 
-local DEBUG_MODE = false
+local DEBUG_MODE = true
 -- Debug print helper function
 local function debugPrint(...)
     if DEBUG_MODE then
@@ -86,8 +86,6 @@ function utils.isTargetInCampQueue(targetID)
     return false
 end
 
-local mq = require('mq')
-
 -- Function to find and equip the best percussion instrument
 local function equipBestPercussionInstrument()
     local bestInstrument = nil
@@ -163,15 +161,16 @@ end
 
 function utils.assistMonitor()
 local assist = require('assist')
-
+debugPrint("assistMonitor")
     if gui.botOn then
-
+debugPrint("gui.botOn")
         if not gui.assistMelee then
+            debugPrint("not gui.assistMelee")
             return
         end
 
         if gui.pullOn then
-
+debugPrint("gui.pullOn")
             -- Ensure `gui.campQueue` is initialized as a table
             gui.campQueue = gui.campQueue or {}
 
@@ -180,16 +179,21 @@ local assist = require('assist')
 
             -- If `gui.keepMobsInCamp` is checked, ensure campQueue has at least `keepMobsInCampAmount` mobs
             if gui.keepMobsInCamp then
+                debugPrint("gui.keepMobsInCamp")
                 if campQueueSize >= gui.keepMobsInCampAmount then
+                    debugPrint("campQueueSize >= gui.keepMobsInCampAmount")
                     return
                 end
             else
+                debugPrint("not gui.keepMobsInCamp")
                 -- Otherwise, ensure campQueue has at least 1 mob if `gui.pullOn` is enabled
                 if campQueueSize >= 1 then
+                    debugPrint("campQueueSize >= 1")
                     return
                 end
             end
         else
+            debugPrint("not gui.pullOn")
             assist.assistRoutine()
         end
     else
@@ -268,7 +272,7 @@ function utils.isInCamp(range)
 end
 
 function utils.referenceLocation(range)
-    range = range or 100  -- Set a default range if none is provided
+    range = range or 50  -- Set a default range if none is provided
 
     -- Determine reference location based on returnToCamp or chaseOn settings
     local referenceLocation
@@ -304,9 +308,10 @@ function utils.referenceLocation(range)
         local distanceToReference = math.sqrt((referenceLocation.x - mobX)^2 +
                                               (referenceLocation.y - mobY)^2 +
                                               (referenceLocation.z - mobZ)^2)
-        return spawn.Type() == 'NPC' and distanceToReference <= range
+        -- Add Line of Sight (LOS) check
+        return spawn.Type() == 'NPC' and distanceToReference <= range and spawn.LineOfSight()
     end)
-    
+
     return mobsInRange  -- Return the list of mobs in range
 end
 

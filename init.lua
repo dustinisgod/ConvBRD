@@ -7,6 +7,14 @@ local spells = require('spells')
 local pull = require('pull')
 local mez = require('mez')
 
+local DEBUG_MODE = false
+-- Debug print helper function
+local function debugPrint(...)
+    if DEBUG_MODE then
+        print(...)
+    end
+end
+
 local class = mq.TLO.Me.Class()
 if class ~= "Bard" then
     print("This script is only for Bards.")
@@ -23,8 +31,6 @@ mq.imgui.init('controlGUI', gui.controlGUI)
 
 commands.init()
 commands.initALL()
-
-spells.startup(currentLevel)
 
 local startupRun = false
 
@@ -54,6 +60,8 @@ local function returnChaseToggle()
         toggleboton = false
     end
 end
+
+
 
 utils.loadPullConfig()
 utils.loadMezConfig()

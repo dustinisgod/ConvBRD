@@ -16,7 +16,7 @@ local pullQueue = {}
 local campQueue = {}
 local aggroQueue = {}  -- New queue to track mobs on their way to camp
 local campQueueCount = 0  -- Variable to track the number of mobs in campQueue
-local zone = mq.TLO.Zone.ShortName() or "Unknown"
+
 local pullability = "220"
 
 local messagePrintedFlags = {
@@ -26,13 +26,6 @@ local messagePrintedFlags = {
     ENC = false
 }
 local pullPauseTimer = os.time()  -- Initialize with the current time
-
-local function getCleanName(name)
-    if not name then
-        return ""
-    end
-    return name:gsub("_%d+$", ""):gsub("_", " ")
-end
 
 local function atan2(y, x)
     if x > 0 then return math.atan(y / x) end
@@ -65,8 +58,13 @@ local function calculateHeadingTo(targetY, targetX)
     return heading
 end
 
+-- Define a predicate function that checks if the spawn is an NPC
+local function isNPC(spawn)
+    return spawn.Type() == 'NPC' and spawn.Distance() <= gui.pullDistanceXY
+end
+
 local function updatePullQueue()
-    -- Initialize pullQueue and reference campQueue location
+    debugPrint("Updating pullQueue...")
     pullQueue = {}
     campQueue = utils.referenceLocation(gui.campSize) or {}
 
@@ -77,14 +75,17 @@ local function updatePullQueue()
     if gui.pullSouth then table.insert(headingRanges, {min = 135, max = 225}) end
     if gui.pullEast then table.insert(headingRanges, {min = 225, max = 315}) end
 
-    -- Combine heading ranges into a single list
+    if #headingRanges == 0 then
+        table.insert(headingRanges, {min = 0, max = 360}) -- Default to all headings
+    end
+
     local function isHeadingValid(heading)
         for _, range in ipairs(headingRanges) do
             if range.min <= range.max then
                 if heading >= range.min and heading <= range.max then
                     return true
                 end
-            else -- Wrap-around case
+            else -- Handle wrap-around cases
                 if heading >= range.min or heading <= range.max then
                     return true
                 end
@@ -93,80 +94,84 @@ local function updatePullQueue()
         return false
     end
 
-    -- Retrieve pulling parameters
+    -- Pull configuration parameters
     local pullDistanceXY = gui.pullDistanceXY
     local pullDistanceZ = gui.pullDistanceZ
     local pullLevelMin = gui.pullLevelMin
     local pullLevelMax = gui.pullLevelMax
 
-    -- Retrieve all spawns and initialize best target variables
-    local allSpawns = mq.getAllSpawns()
+    -- Retrieve all spawns
+    local allSpawns = mq.getFilteredSpawns(isNPC)
     local shortestPathLength = math.huge
     local bestTarget = nil
 
     for _, spawn in ipairs(allSpawns) do
-        -- Attempt to retrieve coordinates from spawn object or fallback to TLO
         local targetY = spawn.Y() or mq.TLO.Spawn("id " .. spawn.ID()).Y()
         local targetX = spawn.X() or mq.TLO.Spawn("id " .. spawn.ID()).X()
-    
+
         -- Skip spawns with invalid coordinates
         if not targetY or not targetX then
-            print("Skipping spawn due to invalid coordinates:", spawn.Name() or "Unnamed")
+            debugPrint("Skipping spawn due to invalid coordinates:", spawn.Name() or "Unnamed")
             goto continue
         end
-    
+
         -- Calculate heading to the spawn
         local headingToSpawn = calculateHeadingTo(targetY, targetX)
         if not headingToSpawn then
-            print("Skipping spawn due to heading calculation failure:", spawn.Name() or "Unnamed")
+            debugPrint("Skipping spawn due to heading calculation failure:", spawn.Name() or "Unnamed")
             goto continue
         end
-    
-        -- Validate other conditions (distance, level, type, etc.)
-        local distanceXY = spawn.Distance()
-        local distanceZ = spawn.DistanceZ()
-        local level = spawn.Level()
-        local cleanName = getCleanName(spawn.Name())
-    
-        -- Check if the spawn is already in campQueue
-        local inPullQueue = false
-        for _, pullMob in ipairs(gui.campQueue) do
-            if pullMob.ID() == spawn.ID() then
-                inPullQueue = true
+
+        -- Validate against campQueue
+        local alreadyInQueue = false
+        for _, campMob in ipairs(campQueue) do
+            if campMob.ID() == spawn.ID() then
+                alreadyInQueue = true
                 break
             end
         end
-    
-        if inPullQueue then
+        if alreadyInQueue then
+            debugPrint("Skipping spawn already in campQueue:", spawn.Name())
             goto continue
         end
-    
+        local mobID = spawn.ID()
+        local mobName = mq.TLO.Spawn(mobID).CleanName()
         -- Check if spawn's name is in the pull ignore list
-        if utils.pullConfig[cleanName] then
+        if utils.pullConfig[mq.TLO.Zone.ShortName()] and utils.pullConfig[mq.TLO.Zone.ShortName()][mobName] then
+            debugPrint("Skipping spawn due to pullConfig exclusion:", mobName)
             goto continue
         end
-    
+
         -- Validate heading range
         if not isHeadingValid(headingToSpawn) then
+            debugPrint("Skipping spawn outside heading range:", spawn.Name())
             goto continue
         end
-    
-        -- Evaluate spawn against pull conditions
-        if spawn.Type() == "NPC" and level >= pullLevelMin and level <= pullLevelMax and distanceXY <= pullDistanceXY and distanceZ <= pullDistanceZ then
+
+        -- Validate against pull conditions
+        local distanceXY = spawn.Distance()
+        local distanceZ = spawn.DistanceZ()
+        local level = spawn.Level()
+
+        if spawn.Type() == "NPC" and
+           level >= pullLevelMin and level <= pullLevelMax and
+           distanceXY <= pullDistanceXY and distanceZ <= pullDistanceZ then
             local pathLength = mq.TLO.Navigation.PathLength("id " .. spawn.ID())()
             if pathLength and pathLength > -1 and pathLength < shortestPathLength then
                 bestTarget = spawn
                 shortestPathLength = pathLength
             end
         end
-    
+
         ::continue::
     end
 
-    -- Add the best target to the pullQueue if one is found
+    -- Add the best target to the pullQueue if it meets conditions
     if bestTarget then
         table.insert(pullQueue, bestTarget)
-        debugPrint("Added target to pullQueue:", bestTarget.Name())
+        debugPrint("Best target added to pullQueue:", bestTarget.Name(), "Path Length:", shortestPathLength)
+    else
+        debugPrint("No suitable target found for pulling.")
     end
 
     -- Sort pullQueue by distance
@@ -269,6 +274,7 @@ end
 
 
 local function pullTarget()
+    debugPrint("Pulling target...")
     if #pullQueue == 0 then
         return
     end
@@ -452,14 +458,15 @@ local function checkHealthAndBuffAndAssist()
 end
 
 local function pullRoutine()
-    zone = mq.TLO.Zone.ShortName() or "Unknown"
-    
+    debugPrint("Running pull routine...")
+   
     if not gui.botOn and gui.pullOn then
         debugPrint("Bot is off. Exiting pull routine.")
         return
     end
 
     if not checkHealthAndBuffAndAssist() then
+        debugPrint("Health, buffs, or main assist status is not OK. Exiting pull routine.")
         return
     end
 
@@ -484,6 +491,7 @@ local function pullRoutine()
     end
 
     -- Check if the current zone does not match camp zone
+    local zone = mq.TLO.Zone.ShortName()
     if zone ~= nav.campLocation.zone then
         print("Current zone does not match camp zone. Aborting pull routine.")
         return
@@ -501,12 +509,15 @@ local function pullRoutine()
 
     local pullCondition
     if gui.keepMobsInCamp then
+        debugPrint("Pulling until campQueue reaches target amount:", targetCampAmount)
         pullCondition = function() return campQueueCount < targetCampAmount and #aggroQueue == 0 end
     else
+        debugPrint("Pulling until campQueue is empty and aggroQueue is empty.")
         pullCondition = function() return campQueueCount == 0 and #aggroQueue == 0 end
     end
 
     while pullCondition() do
+        debugPrint("Pulling target...")
         -- Check if pullOn was unchecked during the routine
         if not gui.pullOn then
             debugPrint("Pull routine stopped.")
@@ -534,6 +545,7 @@ local function pullRoutine()
             updateAggroQueue()
             debugPrint("AggroQueue count:", #aggroQueue)
         else
+            debugPrint("No targets found in pullQueue.")
             break
         end
     end

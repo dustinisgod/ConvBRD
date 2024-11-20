@@ -3,39 +3,55 @@ local gui = require('gui')
 local utils = require('utils')
 local pull = require('pull')
 
+local DEBUG_MODE = true
+-- Debug print helper function
+local function debugPrint(...)
+    if DEBUG_MODE then
+        print(...)
+    end
+end
+
 local assist = {}
 
 local charLevel = mq.TLO.Me.Level()
 
 function assist.assistRoutine()
-
+debugPrint("Running assist routine.")
     if not gui.botOn or not gui.assistMelee then
+        debugPrint("Bot is off or assistMelee is disabled.")
         return
     end
 
     if gui.pullOn and pull.campQueueCount < 0 then
+            debugPrint("Pull is on and campQueueCount is less than 0.")
         return
     elseif gui.pullOn and gui.keepMobsInCamp and gui.keepMobsInCampAmount < pull.campQueueCount then
+        debugPrint("Pull is on, keepMobsInCamp is enabled, and campQueueCount is greater than keepMobsInCampAmount.")
         return
     end
 
     -- Use reference location to find mobs within assist range
     local mobsInRange = utils.referenceLocation(gui.assistRange) or {}
+    debugPrint("Mobs in range: " .. #mobsInRange)
     if #mobsInRange == 0 then
+        debugPrint("No mobs in range.")
         return
     end
 
     -- Check if the main assist is a valid PC, is alive, and is in the same zone
     local mainAssistSpawn = mq.TLO.Spawn(gui.mainAssist)
     if mainAssistSpawn and mainAssistSpawn.Type() == "PC" and not mainAssistSpawn.Dead() then
+        debugPrint("Main assist is a valid PC and is alive.")
         mq.cmdf("/squelch /assist %s", gui.mainAssist)
         mq.delay(200)  -- Short delay to allow the assist command to take effect
     else
+        debugPrint("Main assist is not a valid PC or is dead.")
         return
     end
 
     -- Re-check the target after assisting to confirm it's an NPC within range
     if not mq.TLO.Target() or mq.TLO.Target.Type() ~= "NPC" then
+        debugPrint("No target or target is not an NPC.")
         return
     end
 
