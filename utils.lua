@@ -162,30 +162,35 @@ function utils.monitorNav()
 end
 
 function utils.assistMonitor()
-    local assist = require('assist')
-    
+local assist = require('assist')
+
     if gui.botOn then
-        -- If `gui.pullOn` is not enabled, just run the assist routine
-        if not gui.pullOn then
+
+        if not gui.assistMelee then
             return
         end
 
-        -- Ensure `gui.campQueue` is initialized as a table
-        gui.campQueue = gui.campQueue or {}
+        if gui.pullOn then
 
-        -- Check campQueue requirements if pulling is enabled
-        local campQueueSize = #gui.campQueue
+            -- Ensure `gui.campQueue` is initialized as a table
+            gui.campQueue = gui.campQueue or {}
 
-        -- If `gui.keepMobsInCamp` is checked, ensure campQueue has at least `keepMobsInCampAmount` mobs
-        if gui.keepMobsInCamp then
-            if campQueueSize >= gui.keepMobsInCampAmount then
-                return
+            -- Check campQueue requirements if pulling is enabled
+            local campQueueSize = #gui.campQueue
+
+            -- If `gui.keepMobsInCamp` is checked, ensure campQueue has at least `keepMobsInCampAmount` mobs
+            if gui.keepMobsInCamp then
+                if campQueueSize >= gui.keepMobsInCampAmount then
+                    return
+                end
+            else
+                -- Otherwise, ensure campQueue has at least 1 mob if `gui.pullOn` is enabled
+                if campQueueSize >= 1 then
+                    return
+                end
             end
         else
-            -- Otherwise, ensure campQueue has at least 1 mob if `gui.pullOn` is enabled
-            if campQueueSize >= 1 then
-                return
-            end
+            assist.assistRoutine()
         end
     else
         return
