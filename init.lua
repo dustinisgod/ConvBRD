@@ -28,11 +28,16 @@ spells.startup(currentLevel)
 
 local startupRun = false
 
+-- Function to check the botOn status and run startup once
 local function checkBotOn(currentLevel)
     if gui.botOn and not startupRun then
+        nav.setCamp()
         spells.startup(currentLevel)
-        startupRun = true
+        startupRun = true  -- Set flag to prevent re-running
+        printf("Bot has been turned on. Running startup.")
+
     elseif not gui.botOn and startupRun then
+        -- Optional: Reset the flag if bot is turned off
         startupRun = false
     end
 end
@@ -59,6 +64,8 @@ while gui.controlGUI do
 
     if gui.botOn then
 
+        checkBotOn(currentLevel)
+
         utils.monitorNav()
 
         if gui.singSongs then
@@ -76,8 +83,6 @@ while gui.controlGUI do
         if gui.assistMelee then
             utils.assistMonitor()
         end
-
-        checkBotOn(currentLevel)
 
         local newLevel = mq.TLO.Me.Level()
         if newLevel ~= currentLevel then

@@ -16,10 +16,8 @@ local pullQueue = {}
 local campQueue = {}
 local aggroQueue = {}  -- New queue to track mobs on their way to camp
 local campQueueCount = 0  -- Variable to track the number of mobs in campQueue
-
-local pullability = "220"
-
 local zone = mq.TLO.Zone.ShortName() or "Unknown"
+local pullability = "220"
 
 local messagePrintedFlags = {
     CLR = false,
@@ -454,6 +452,8 @@ local function checkHealthAndBuffAndAssist()
 end
 
 local function pullRoutine()
+    zone = mq.TLO.Zone.ShortName() or "Unknown"
+    
     if not gui.botOn and gui.pullOn then
         debugPrint("Bot is off. Exiting pull routine.")
         return
