@@ -52,16 +52,16 @@ local toggleboton = false
 local function returnChaseToggle()
     -- Check if bot is on and return-to-camp is enabled, and only set camp if toggleboton is false
     if gui.botOn and gui.returnToCamp and not toggleboton then
+        debugPrint("Setting camp")
         nav.setCamp()
         toggleboton = true
     elseif not gui.botOn and toggleboton then
+        debugPrint("Clearing camp")
         -- Clear camp if bot is turned off after being on
         nav.clearCamp()
         toggleboton = false
     end
 end
-
-
 
 utils.loadPullConfig()
 utils.loadMezConfig()
@@ -77,23 +77,28 @@ while gui.controlGUI do
         utils.monitorNav()
 
         if gui.singSongs then
+            debugPrint("Singing songs")
             utils.twistSongMonitor()
         end
 
         if gui.pullOn then
+            debugPrint("Pulling")
             pull.pullRoutine()
         end
 
         if gui.singSongs and gui.singMez then
+            debugPrint("Mezzing")
             mez.mezRoutine()
         end
 
         if gui.assistMelee then
+            debugPrint("Assisting melee")
             utils.assistMonitor()
         end
 
         local newLevel = mq.TLO.Me.Level()
         if newLevel ~= currentLevel then
+            debugPrint("Level has changed from " .. currentLevel .. " to " .. newLevel .. ". Updating spells.")
             printf(string.format("Level has changed from %d to %d. Updating spells.", currentLevel, newLevel))
             spells.startup(newLevel)
             currentLevel = newLevel

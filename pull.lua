@@ -472,7 +472,6 @@ local function pullRoutine()
 
     if gui.pullPause and os.difftime(os.time(), pullPauseTimer) >= (gui.pullPauseTimer * 60) then
         if utils.isInCamp() then
-            debugPrint("Pull routine paused for " .. gui.pullPauseDuration .. " minutes.")
             print("Pull routine paused for " .. gui.pullPauseDuration .. " minutes.")
             mq.delay(gui.pullPauseDuration * 60 * 1000)  -- Pause timer
 

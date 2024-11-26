@@ -163,33 +163,26 @@ function utils.assistMonitor()
 local assist = require('assist')
 debugPrint("assistMonitor")
     if gui.botOn then
-debugPrint("gui.botOn")
         if not gui.assistMelee then
             debugPrint("not gui.assistMelee")
             return
         end
 
         if gui.pullOn then
-debugPrint("gui.pullOn")
-            -- Ensure `gui.campQueue` is initialized as a table
+            debugPrint("gui.pullOn")
             gui.campQueue = gui.campQueue or {}
-
-            -- Check campQueue requirements if pulling is enabled
             local campQueueSize = #gui.campQueue
 
-            -- If `gui.keepMobsInCamp` is checked, ensure campQueue has at least `keepMobsInCampAmount` mobs
             if gui.keepMobsInCamp then
                 debugPrint("gui.keepMobsInCamp")
                 if campQueueSize >= gui.keepMobsInCampAmount then
                     debugPrint("campQueueSize >= gui.keepMobsInCampAmount")
-                    return
+                    assist.assistRoutine()
                 end
             else
-                debugPrint("not gui.keepMobsInCamp")
-                -- Otherwise, ensure campQueue has at least 1 mob if `gui.pullOn` is enabled
                 if campQueueSize >= 1 then
                     debugPrint("campQueueSize >= 1")
-                    return
+                    assist.assistRoutine()
                 end
             end
         else
@@ -197,6 +190,7 @@ debugPrint("gui.pullOn")
             assist.assistRoutine()
         end
     else
+        debugPrint("not gui.botOn")
         return
     end
 end
@@ -303,6 +297,17 @@ function utils.referenceLocation(range)
         local mobX, mobY, mobZ = spawn.X(), spawn.Y(), spawn.Z()
         if not mobX or not mobY or not mobZ then
             return false  -- Skip this spawn if any coordinate is nil
+        end
+
+        local mobID = spawn.ID()
+        local mobName = mq.TLO.Spawn(mobID).CleanName()
+        local currentZone = mq.TLO.Zone.ShortName()
+
+        -- Check if the mob is in the globalIgnoreList or zone-specific ignore list
+        if utils.pullConfig.globalIgnoreList[mobName] or 
+           (utils.pullConfig[currentZone] and utils.pullConfig[currentZone][mobName]) then
+            debugPrint("Skipping spawn due to pullConfig exclusion:", mobName)
+            return false
         end
 
         local distanceToReference = math.sqrt((referenceLocation.x - mobX)^2 +
