@@ -7,7 +7,7 @@ local spells = require('spells')
 local pull = require('pull')
 local mez = require('mez')
 
-local DEBUG_MODE = true
+local DEBUG_MODE = false
 -- Debug print helper function
 local function debugPrint(...)
     if DEBUG_MODE then
