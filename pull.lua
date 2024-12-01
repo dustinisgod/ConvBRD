@@ -2,7 +2,6 @@ local mq = require('mq')
 local gui = require('gui')
 local utils = require('utils')
 local nav = require('nav')
-local corpsedrag = require('corpsedrag')
 
 local DEBUG_MODE = false
 -- Debug print helper function
@@ -312,9 +311,13 @@ local function pullTarget()
 
     while mq.TLO.Target() and mq.TLO.Target.PctAggro() <= 0 do
         if gui.botOn and gui.pullOn then
-            if not mq.TLO.Target() then
-                print("Error: No target selected. Exiting pull routine.")
+            debugPrint("Bot is on. Pulling target:", target.Name())
+            if not mq.TLO.Target() and not target then
+                debugPrint("Target is nil. Exiting pull routine.")
                 return
+            elseif not mq.TLO.Target() and target or mq.TLO.Target() ~= target then
+                debugPrint("Target is not selected. Selecting target:", target.Name())
+                mq.cmdf("/squelch /target id %d", target.ID())
             end
 
             utils.useSeloWithPercussion()

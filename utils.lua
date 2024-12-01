@@ -2,6 +2,7 @@ local mq = require('mq')
 local gui = require('gui')
 local nav = require('nav')
 local spells = require('spells')
+local corpsedrag = require('corpsedrag')
 
 local DEBUG_MODE = false
 -- Debug print helper function
@@ -153,6 +154,27 @@ function utils.monitorNav()
         elseif gui.chaseOn and (currentTime - lastNavTime >= 2) then
             nav.chase()
             lastNavTime = currentTime
+        end
+    else
+        return
+    end
+end
+
+local lastCorpseDragTime = 0
+
+function utils.monitorCorpseDrag()
+
+    if gui.botOn and gui.corpsedrag then
+        if not gui then
+            printf("Error: gui is nil")
+            return
+        end
+
+        local currentTime = os.time()
+
+        if gui.corpsedrag and (currentTime - lastCorpseDragTime >= 10) then
+            corpsedrag.corpsedragRoutine()
+            lastCorpseDragTime = currentTime
         end
     else
         return

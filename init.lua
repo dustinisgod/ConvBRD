@@ -7,7 +7,7 @@ local spells = require('spells')
 local pull = require('pull')
 local mez = require('mez')
 
-local DEBUG_MODE = false
+local DEBUG_MODE = true
 -- Debug print helper function
 local function debugPrint(...)
     if DEBUG_MODE then
@@ -79,6 +79,11 @@ while gui.controlGUI do
         if gui.singSongs then
             debugPrint("Singing songs")
             utils.twistSongMonitor()
+        end
+
+        if gui.corpsedrag then
+            debugPrint("Dragging corpses")
+            utils.monitorCorpseDrag()
         end
 
         if gui.pullOn then

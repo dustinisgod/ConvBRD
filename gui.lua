@@ -64,7 +64,7 @@ local function setDefaultConfig()
     gui.pullEast = false
     gui.pullSouth = false
     gui.pullWest = false
-
+    gui.corpsedrag = false
 end
 
 function gui.getPullDistanceXY()
@@ -561,6 +561,11 @@ local function controlGUI()
                 end
             end
         end
+    end
+    ImGui.Spacing()
+    if ImGui.CollapsingHeader("Misc Settings:") then
+    ImGui.Spacing()
+        gui.corpsedrag = ImGui.Checkbox("Corpse Drag", gui.corpsedrag or false)
     end
 
     ImGui.End()
