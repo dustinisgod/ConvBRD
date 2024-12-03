@@ -224,7 +224,7 @@ local function returnToCampIfNeeded()
             mq.cmd("/face fast")  -- Face camp direction after reaching camp
             mq.delay(100)
             if mq.TLO.Target() and mq.TLO.Target.PctAggro() > 0 then
-                while mq.TLO.Target.Distance() > gui.campSize do
+                while mq.TLO.Target() and mq.TLO.Target.Distance() > gui.campSize and mq.TLO.Target.PctAggro() == 100 do
                     mq.delay(10)
                 end
                 return
@@ -325,7 +325,7 @@ local function pullTarget()
         if mq.TLO.Me.AltAbilityReady(pullability) then
             debugPrint("Pulling target:", target.Name(), "with ability:", pullability)
             mq.cmdf("/squelch /alt act %s", pullability)
-            mq.delay(200)
+            mq.delay(300)
             mq.doevents()
         end
     end
@@ -339,10 +339,13 @@ local function pullTarget()
     end
 
     if mq.TLO.Target.Distance() <= 150 and mq.TLO.Target.LineOfSight() then
-        debugPrint("Target is in line of sight and within range.")
+        debugPrint("First Check. Target is in line of sight and within range.")
         tryPullAbility()
+        debugPrint(mq.TLO.Me.PctAggro())
         if mq.TLO.Target.PctAggro() > 0 then
+            debugPrint("Target has aggro. Adding to aggroQueue 1.")
             handleAggro()
+            debugPrint("Exiting pull routine.1")
             return
         end
     end
@@ -367,9 +370,11 @@ local function pullTarget()
         if mq.TLO.Target.Distance() <= 150 and mq.TLO.Target.LineOfSight() then
             debugPrint("Target is in line of sight and within range during navigation.")
             tryPullAbility()
+            debugPrint(mq.TLO.Me.PctAggro())
             if mq.TLO.Target.PctAggro() > 0 then
-                debugPrint(mq.TLO.Me.PctAggro())
+                debugPrint("Target has aggro. Adding to aggroQueue 2.")
                 handleAggro()
+                debugPrint("Exiting pull routine.2")
                 return
             end
         end
@@ -380,8 +385,11 @@ local function pullTarget()
     if mq.TLO.Target.Distance() <= 150 and mq.TLO.Target.LineOfSight() then
         debugPrint("Final check: Target is in line of sight and within range.")
         tryPullAbility()
+        debugPrint(mq.TLO.Me.PctAggro())
         if mq.TLO.Target.PctAggro() > 0 then
+            debugPrint("Target has aggro. Adding to aggroQueue 3.")
             handleAggro()
+            debugPrint("Exiting pull routine.3")
             return
         end
     end
@@ -568,11 +576,9 @@ local function pullRoutine()
         if not gui.pullOn then
             debugPrint("Pull routine stopped.")
             return
-        elseif mq.TLO.Navigation.Active() then
-            debugPrint("Navigation is active. Stopping pull routine.")
-            mq.cmd("/squelch /nav stop")
-            return
         end
+
+        updatePullQueue()
 
         local groupStatusOk = checkGroupMemberStatus()
         if not groupStatusOk then
@@ -580,7 +586,6 @@ local function pullRoutine()
             break
         end
 
-        updatePullQueue()
         debugPrint("PullQueue count:", #pullQueue)
         if #pullQueue > 0 then
             pullTarget()

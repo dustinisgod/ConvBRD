@@ -192,12 +192,12 @@ debugPrint("assistMonitor")
 
         if gui.pullOn then
             debugPrint("gui.pullOn")
-            gui.campQueue = gui.campQueue or {}
-            local campQueueSize = #gui.campQueue
-
+            local campQueue = utils.referenceLocation(gui.campSize) or {}
+            local campQueueSize = #campQueue
+                debugPrint("campQueueSize", campQueueSize)
             if gui.keepMobsInCamp then
                 debugPrint("gui.keepMobsInCamp")
-                if campQueueSize >= gui.keepMobsInCampAmount then
+                if campQueueSize and campQueueSize >= gui.keepMobsInCampAmount then
                     debugPrint("campQueueSize >= gui.keepMobsInCampAmount")
                     assist.assistRoutine()
                 end
