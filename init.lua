@@ -51,7 +51,7 @@ end
 local toggleboton = false
 local function returnChaseToggle()
     -- Check if bot is on and return-to-camp is enabled, and only set camp if toggleboton is false
-    if gui.botOn and gui.returnToCamp and not toggleboton then
+    if gui.botOn and gui.returntocamp and not toggleboton then
         debugPrint("Setting camp")
         nav.setCamp()
         toggleboton = true
@@ -74,6 +74,7 @@ while gui.controlGUI do
 
         checkBotOn(currentLevel)
 
+        debugPrint("Navigating")
         utils.monitorNav()
 
         if gui.singSongs then

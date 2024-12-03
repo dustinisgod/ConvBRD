@@ -83,7 +83,7 @@ debugPrint("Running assist routine.")
         end
     end
 
-    if mq.TLO.Me.CombatState() == "COMBAT" and mq.TLO.Target() and mq.TLO.Target.Dead() ~= ("true" or "nil") then
+    while mq.TLO.Me.CombatState() == "COMBAT" and mq.TLO.Target() and not mq.TLO.Target.Dead() do
 
         if mq.TLO.Target() and not mq.TLO.Target.Mezzed() and mq.TLO.Target.PctHPs() <= gui.assistPercent and mq.TLO.Target.Distance() <= gui.assistRange then
             mq.cmd("/squelch /attack on")
@@ -127,7 +127,17 @@ debugPrint("Running assist routine.")
                 end
             end
         end
-        
+
+        if mq.TLO.Me.Combat() and not mq.TLO.Stick() then
+            mq.cmd("/squelch /attack off")
+            return
+        end
+
+        if mq.TLO.Target() and mq.TLO.Target.Dead() or not mq.TLO.Target() then
+            mq.cmd("/squelch /attack off")
+            return
+        end
+
         mq.delay(50)
     end
 end

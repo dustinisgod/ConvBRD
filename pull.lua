@@ -207,13 +207,13 @@ local function returnToCampIfNeeded()
     -- Check if camp location is set
     if nav.campLocation then
         -- Retrieve player and camp coordinates
-        local playerX, playerY = mq.TLO.Me.X(), mq.TLO.Me.Y()
+        local playerX, playerY, playerZ = mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z()
         local campX = tonumber(nav.campLocation.x) or 0
         local campY = tonumber(nav.campLocation.y) or 0
         local campZ = tonumber(nav.campLocation.z) or 0
 
         -- Calculate distance to camp
-        local distanceToCamp = math.sqrt((playerX - campX)^2 + (playerY - campY)^2)
+        local distanceToCamp = math.sqrt((playerX - campX)^2 + (playerY - campY)^2 + (playerZ - campZ)^2)
 
         -- Navigate back to camp if beyond threshold
         if distanceToCamp > 50 then
@@ -488,6 +488,7 @@ local function pullRoutine()
 
     -- Check if nav.campLocation exists and has a valid zone
     if not nav.campLocation or not nav.campLocation.zone or nav.campLocation.zone == "nil" then
+        debugPrint("nav.campLocation: ", nav.campLocation and nav.campLocation.zone)
         print("Camp location is not set. Aborting pull routine.")
         return
     end

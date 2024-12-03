@@ -15,28 +15,26 @@ local corpsedrag = {}
 
 local function returnToCampIfNeeded()
     local utils = require('utils')
-
     if nav.campLocation then
         -- Retrieve player and camp coordinates
-        local playerX, playerY = mq.TLO.Me.X(), mq.TLO.Me.Y()
+        local playerX, playerY, playerZ = mq.TLO.Me.X(), mq.TLO.Me.Y(), mq.TLO.Me.Z()
         local campX = tonumber(nav.campLocation.x) or 0
         local campY = tonumber(nav.campLocation.y) or 0
         local campZ = tonumber(nav.campLocation.z) or 0
 
         -- Calculate distance to camp
-        local distanceToCamp = math.sqrt((playerX - campX)^2 + (playerY - campY)^2)
+        local distanceToCamp = math.sqrt((playerX - campX)^2 + (playerY - campY)^2 + (playerZ - campZ)^2)
 
+        -- Navigate back to camp if beyond threshold
         if distanceToCamp > 50 then
-            debugPrint("Navigating back to camp location.")
             mq.cmdf("/squelch /nav loc %f %f %f", campY, campX, campZ)
             while mq.TLO.Navigation.Active() do
                 utils.useSeloWithPercussion()
                 mq.delay(50)
             end
-            return true
+            mq.cmd("/face fast")  -- Face camp direction after reaching camp
         end
     end
-    return false
 end
 
 function corpsedrag.corpsedragRoutine()
@@ -45,7 +43,7 @@ function corpsedrag.corpsedragRoutine()
         return
     end
 
-    if not gui.corpsedrag and (not gui.returnToCamp or not nav.campLocation) then
+    if not gui.corpsedrag and (not gui.returntocamp or not nav.campLocation) then
         debugPrint("Corpsedrag is off, and no return to camp configured. Exiting routine.")
         return
     end
@@ -127,7 +125,7 @@ function corpsedrag.corpsedragRoutine()
                         mq.cmd('/corpsedrag')
                         mq.delay(500)
 
-                        if gui.returnToCamp then
+                        if gui.returntocamp then
                             returnToCampIfNeeded()
                         end
 
