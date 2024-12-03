@@ -50,20 +50,20 @@ debugPrint("Running assist routine.")
     end
 
     -- Re-check the target after assisting to confirm it's an NPC within range
-    if not mq.TLO.Target() or mq.TLO.Target.Type() ~= "NPC" then
+    if not mq.TLO.Target() or (mq.TLO.Target() and mq.TLO.Target.Type() ~= "NPC") then
         debugPrint("No target or target is not an NPC.")
         return
     end
 
-    if mq.TLO.Target() and mq.TLO.Target.PctHPs() <= gui.assistPercent and mq.TLO.Target.Distance() <= gui.assistRange and mq.TLO.Stick() == "OFF" and not mq.TLO.Target.Mezzed() then
-        if gui.stickFront then
+    if mq.TLO.Target() and mq.TLO.Target.PctHPs() <= gui.assistPercent and mq.TLO.Target.Distance() <= gui.assistRange and mq.TLO.Stick.Active() and not mq.TLO.Target.Mezzed() then
+        if mq.TLO.Target() and gui.stickFront then
             mq.cmd('/squelch /nav stop')
             mq.delay(100)
             mq.cmd("/stick moveback 0")
             mq.delay(100)
             mq.cmdf("/squelch /stick front %d uw", gui.stickDistance)
             mq.delay(100)
-        elseif gui.stickBehind then
+        elseif mq.TLO.Target() and gui.stickBehind then
             mq.cmd('/squelch /nav stop')
             mq.delay(100)
             mq.cmd("/stick moveback 0")
@@ -85,6 +85,12 @@ debugPrint("Running assist routine.")
 
     while mq.TLO.Me.CombatState() == "COMBAT" and mq.TLO.Target() and not mq.TLO.Target.Dead() do
 
+        -- Re-check the target after assisting to confirm it's an NPC within range
+        if not mq.TLO.Target() or (mq.TLO.Target() and mq.TLO.Target.Type() ~= "NPC") then
+            debugPrint("No target or target is not an NPC.")
+            return
+        end
+
         if mq.TLO.Target() and not mq.TLO.Target.Mezzed() and mq.TLO.Target.PctHPs() <= gui.assistPercent and mq.TLO.Target.Distance() <= gui.assistRange then
             mq.cmd("/squelch /attack on")
         elseif mq.TLO.Target() and (mq.TLO.Target.Mezzed() or mq.TLO.Target.PctHPs() > gui.assistPercent or mq.TLO.Target.Distance() > (gui.assistRange + 30)) then
@@ -104,24 +110,24 @@ debugPrint("Running assist routine.")
 
         local lastStickDistance = nil
 
-        if mq.TLO.Target() and mq.TLO.Stick() == "ON" then
+        if mq.TLO.Target() and mq.TLO.Stick.Active() then
             local stickDistance = gui.stickDistance -- current GUI stick distance
             local lowerBound = stickDistance * 0.9
             local upperBound = stickDistance * 1.1
             local targetDistance = mq.TLO.Target.Distance()
             
             -- Check if stickDistance has changed
-            if lastStickDistance ~= stickDistance then
+            if lastStickDistance and lastStickDistance ~= stickDistance then
                 lastStickDistance = stickDistance
                 mq.cmdf("/squelch /stick moveback %s", stickDistance)
             end
     
             -- Check if the target distance is out of bounds and adjust as necessary
-            if mq.TLO.Target.ID() then
-                if targetDistance > upperBound then
+            if mq.TLO.Target() and mq.TLO.Target.ID() then
+                if mq.TLO.Target() and targetDistance > upperBound then
                     mq.cmdf("/squelch /stick moveback %s", stickDistance)
                     mq.delay(100)
-                elseif targetDistance < lowerBound then
+                elseif mq.TLO.Target() and targetDistance < lowerBound then
                     mq.cmdf("/squelch /stick moveback %s", stickDistance)
                     mq.delay(100)
                 end
