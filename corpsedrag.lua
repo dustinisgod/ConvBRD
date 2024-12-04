@@ -110,12 +110,12 @@ function corpsedrag.corpsedragRoutine()
 
             if mq.TLO.Target() and corpseID and mq.TLO.Target.ID() == corpseID and mq.TLO.Target.Distance() < 75 then
                 return
-            elseif mq.TLO.Target.Distance() > 75 then
-                if mq.TLO.Target.ID() == corpseID then
+            elseif mq.TLO.Target() and mq.TLO.Target.Distance() > 75 then
+                if mq.TLO.Target() and mq.TLO.Target.ID() == corpseID then
                     if mq.TLO.Navigation.PathExists("id " .. corpseIDString)() then
                         debugPrint("Path found to corpse of: ", memberName)
                         mq.cmdf('/nav id %d', corpseID)
-                        while mq.TLO.Navigation.Active() and mq.TLO.Target.Distance() > 95 do
+                        while mq.TLO.Target() and mq.TLO.Navigation.Active() and mq.TLO.Target.Distance() > 95 do
                             mq.delay(100)
                         end
 
