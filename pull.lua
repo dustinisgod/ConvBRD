@@ -260,7 +260,7 @@ local function updateAggroQueue()
             -- Verify mob is still the target and has aggro
             if mq.TLO.Target.ID() ~= mobID then
                 table.remove(aggroQueue, i)  -- Remove if target doesn't match
-            elseif mq.TLO.Target.PctAggro() == 0 or not mq.TLO.Target.AggroHolder() then
+            elseif mq.TLO.Target() and mq.TLO.Target.PctAggro() == 0 or not mq.TLO.Target.AggroHolder() then
                 table.remove(aggroQueue, i)  -- Remove if no aggro
             else
                 -- Check if mob is within the camp assist range
@@ -313,7 +313,7 @@ local function pullTarget()
     end
 
     -- Check if the target is mezzed and within camp size + buffer
-    if mq.TLO.Target.Mezzed() and mq.TLO.Target.Distance() <= (gui.campSize + 20) then
+    if mq.TLO.Target() and mq.TLO.Target.Mezzed() and mq.TLO.Target.Distance() <= (gui.campSize + 20) then
         debugPrint("Target is mezzed. Adding target to campQueue:", target.Name())
         table.insert(campQueue, target)
         table.remove(pullQueue, 1)
@@ -338,11 +338,11 @@ local function pullTarget()
         returnToCampIfNeeded()
     end
 
-    if mq.TLO.Target.Distance() <= 150 and mq.TLO.Target.LineOfSight() then
+    if mq.TLO.Target() and mq.TLO.Target.Distance() <= 150 and mq.TLO.Target.LineOfSight() then
         debugPrint("First Check. Target is in line of sight and within range.")
         tryPullAbility()
         debugPrint(mq.TLO.Me.PctAggro())
-        if mq.TLO.Target.PctAggro() > 0 then
+        if mq.TLO.Target() and mq.TLO.Target.PctAggro() > 0 then
             debugPrint("Target has aggro. Adding to aggroQueue 1.")
             handleAggro()
             debugPrint("Exiting pull routine.1")
@@ -361,17 +361,20 @@ local function pullTarget()
     while mq.TLO.Navigation.Active() do
         if not gui.botOn or not gui.pullOn then
             debugPrint("Bot is off. Stopping navigation and exiting pull routine.")
-            mq.cmd("/squelch /nav stop")
+            if mq.TLO.Navigation.Active() then
+                debugPrint("Stopping navigation.")
+                mq.cmd("/squelch /nav stop")
+            end
             return
         end
 
         utils.useSeloWithPercussion()
 
-        if mq.TLO.Target.Distance() <= 150 and mq.TLO.Target.LineOfSight() then
+        if mq.TLO.Target() and mq.TLO.Target.Distance() <= 150 and mq.TLO.Target.LineOfSight() then
             debugPrint("Target is in line of sight and within range during navigation.")
             tryPullAbility()
             debugPrint(mq.TLO.Me.PctAggro())
-            if mq.TLO.Target.PctAggro() > 0 then
+            if mq.TLO.Target() and mq.TLO.Target.PctAggro() > 0 then
                 debugPrint("Target has aggro. Adding to aggroQueue 2.")
                 handleAggro()
                 debugPrint("Exiting pull routine.2")
@@ -382,11 +385,11 @@ local function pullTarget()
     end
 
     -- Final aggro check after navigation completes
-    if mq.TLO.Target.Distance() <= 150 and mq.TLO.Target.LineOfSight() then
+    if mq.TLO.Target() and mq.TLO.Target.Distance() <= 150 and mq.TLO.Target.LineOfSight() then
         debugPrint("Final check: Target is in line of sight and within range.")
         tryPullAbility()
         debugPrint(mq.TLO.Me.PctAggro())
-        if mq.TLO.Target.PctAggro() > 0 then
+        if mq.TLO.Target() and mq.TLO.Target.PctAggro() > 0 then
             debugPrint("Target has aggro. Adding to aggroQueue 3.")
             handleAggro()
             debugPrint("Exiting pull routine.3")
