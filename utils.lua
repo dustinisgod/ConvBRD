@@ -148,10 +148,10 @@ function utils.monitorNav()
 
         local currentTime = os.time()
 
-        if gui.returntocamp and (currentTime - lastNavTime >= 5) then
+        if gui.returntocamp and (currentTime - lastNavTime >= 5) and not mq.TLO.Stick.Active() then
             nav.checkCampDistance()
             lastNavTime = currentTime
-        elseif gui.chaseon and (currentTime - lastNavTime >= 2) then
+        elseif gui.chaseon and (currentTime - lastNavTime >= 2) and not mq.TLO.Stick.Active() then
             nav.chase()
             lastNavTime = currentTime
         end
