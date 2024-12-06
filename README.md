@@ -1,3 +1,5 @@
+version=1.0.0
+
 # Convergence Bard Bot Command Guide
 
 ### Start Script

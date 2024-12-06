@@ -109,13 +109,18 @@ function corpsedrag.corpsedragRoutine()
             mq.delay(300)
 
             if mq.TLO.Target() and corpseID and mq.TLO.Target.ID() == corpseID and mq.TLO.Target.Distance() < 75 then
+                debugPrint("Corpse of: ", memberName, " is within 75 units.")
                 return
             elseif mq.TLO.Target() and mq.TLO.Target.Distance() > 75 then
+                debugPrint("Corpse of: ", memberName, " is out of range.")
                 if mq.TLO.Target() and mq.TLO.Target.ID() == corpseID then
+                    debugPrint("Targeting corpse of: ", memberName)
                     if mq.TLO.Navigation.PathExists("id " .. corpseIDString)() then
                         debugPrint("Path found to corpse of: ", memberName)
                         mq.cmdf('/nav id %d', corpseID)
+                        mq.delay(500, function() return mq.TLO.Target() and mq.TLO.Navigation.Active() end)
                         while mq.TLO.Target() and mq.TLO.Navigation.Active() and mq.TLO.Target.Distance() > 95 do
+                            debugPrint("Moving to corpse of: ", memberName)
                             mq.delay(100)
                         end
 
@@ -126,6 +131,7 @@ function corpsedrag.corpsedragRoutine()
                         mq.delay(500)
 
                         if gui.returntocamp then
+                            debugPrint("Returning to camp after dragging")
                             returnToCampIfNeeded()
                         end
 
