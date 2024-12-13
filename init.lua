@@ -40,10 +40,13 @@ local function checkBotOn(currentLevel)
         nav.setCamp()
         spells.startup(currentLevel)
         printf("Bot has been turned on. Running startup.")
-        ---@diagnostic disable-next-line: undefined-field
-        if mq.TLO.BardSwap() == "FALSE" then
-            mq.cmd('/bardswap')
-            mq.cmd('/bardswap melee')
+        local bardswap = "Bardswap"
+        if mq.TLO.Plugin('MQ2BardSwap').IsLoaded() then
+            ---@diagnostic disable-next-line: undefined-field
+            if mq.TLO.BardSwap() == "FALSE" then
+                mq.cmd('/bardswap')
+                mq.cmd('/bardswap melee')
+            end
         end
     startupRun = true  -- Set flag to prevent re-running
     elseif not gui.botOn and startupRun then
