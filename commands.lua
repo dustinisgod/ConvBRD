@@ -230,6 +230,7 @@ local function setSingOptions(option, value)
         aggro = "singAggroReduction",
         melee = "meleeGroup",
         caster = "casterGroup",
+        waterbreathing = "singwaterbreathing"
     }
 
     if option == "on" or option == "off" then
@@ -253,14 +254,33 @@ local function setSingOptions(option, value)
 
             -- Ensure only one resist type is active at a time
             if songKey == 'singMagicResist' then
+                gui.singMagicResist = true
                 gui.singFireColdResist = false
                 gui.singDiseasePoisonResist = false
             elseif songKey == 'singFireColdResist' then
+                gui.singFireColdResist = true
                 gui.singMagicResist = false
                 gui.singDiseasePoisonResist = false
             elseif songKey == 'singDiseasePoisonResist' then
+                gui.singDiseasePoisonResist = true
                 gui.singMagicResist = false
                 gui.singFireColdResist = false
+            elseif songKey == 'singwaterbreathing' then
+                gui.singwaterbreathing = true
+            elseif songKey == 'singMez' then
+                gui.singMez = true
+            elseif songKey == 'singSlow' then
+                gui.singSlow = true
+            elseif songKey == 'singAggroReduction' then
+                gui.singAggroReduction = true
+            elseif songKey == 'runspeed' then
+                gui.singRunSpeed = true
+            elseif songKey == 'meleeGroup' then
+                gui.meleeGroup = true
+                gui.casterGroup = false
+            elseif songKey == 'casterGroup' then
+                gui.casterGroup = true
+                gui.meleeGroup = false
             end
 
         elseif value == "off" then
@@ -270,7 +290,8 @@ local function setSingOptions(option, value)
             print("Error: Value must be 'on' or 'off'. Usage: /convBRD singsong <songname> on/off")
         end
     else
-        print("Error: Invalid song name or command. Usage: /convBRD singsong on/off or /convBRD singsong <songname> on/off")
+        print("Usage: /convBRD singsong on/off or /convBRD singsong <songname> on/off")
+        print "Song Names: run, magic, fire, cold, disease, poison, mez, slow, aggro, melee, caster"
     end
 end
 

@@ -113,7 +113,7 @@ Commands to manage song twisting and individual song settings.
 ### Sing Specific Song
 - Command: `/ConvBRD SingSong <songtype> on/off`
 - Description: Enables or disables a specific song.
-- Valid song options include: `run`, `magic`, `fire`, `cold`, `disease`, `poison`, `mez`, `slow`, `aggro`
+- Valid song options include: `run`, `magic`, `fire`, `cold`, `disease`, `poison`, `mez`, `slow`, `aggro`, `waterbreathing`, `caster`, `melee`
 
 ---
 

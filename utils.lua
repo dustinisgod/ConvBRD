@@ -358,6 +358,17 @@ function utils.twistSongMonitor()
 
     utils.useSeloWithPercussion()
 
+    -- Spellgem 1
+    if gui.singwaterbreathing then
+        local bestSpell = spells.findBestSpell("WaterBreathing", charLevel)
+        if mq.TLO.Me.Gem(1).Name() ~= bestSpell then
+            mq.cmd("/twist stop")
+            mq.delay(100)
+            spells.loadAndMemorizeSpell("WaterBreathing", charLevel, 1)
+        end
+        table.insert(twistList, 1)
+    end
+
     -- Spellgem 2
     if gui.meleeGroup and charLevel >= 10 then
         local bestSpell = spells.findBestSpell("Haste", charLevel)
@@ -398,9 +409,8 @@ function utils.twistSongMonitor()
             spells.loadAndMemorizeSpell("ResistanceFireCold", charLevel, 5)
         end
         table.insert(twistList, 5)
-    end
-    
-    if gui.singDiseasePoisonResist and charLevel >= 13 then
+
+    elseif gui.singDiseasePoisonResist and charLevel >= 13 then
         local bestSpell = spells.findBestSpell("ResistancePoisonDisease", charLevel)
         if mq.TLO.Me.Gem(5).Name() ~= bestSpell then
             mq.cmd("/twist stop")
@@ -411,7 +421,6 @@ function utils.twistSongMonitor()
     end
 
     -- Spellgem 6
-
     if gui.singMagicResist and charLevel >= 41 then
         local bestSpell = spells.findBestSpell("Absorb", charLevel)
         if mq.TLO.Me.Gem(6).Name() ~= bestSpell then

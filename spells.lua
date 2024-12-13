@@ -4,7 +4,6 @@ local gui = require('gui')
 local spells = {
 
     Haste = {
-
         {level = 57, name = "McVaxius' Rousing Rondo"},         --haste/str/atk/dmgshield
         {level = 50, name = "Verses of Victory"},               --haste/str/agi/ac
         {level = 42, name = "McVaxius' Berserker Crescendo"},   --haste/str/ac
@@ -23,11 +22,9 @@ local spells = {
     MrBuff = {
         {level = 17, name = "Guardian Rhythms"}                 --mr/ac
     },
-
     ResistanceFireCold = {
         {level = 9, name = "Elemental Rhythms"}                 --mr/cold/fire/ac
     },
-
     ResistancePoisonDisease = {
         {level = 13, name = "Purifying Rhythms"}                --mr/poison/disease/ac
     },
@@ -38,8 +35,6 @@ local spells = {
         {level = 53, name = "Song of Twilight"},                --mez55
         {level = 28, name = "Crission's Pixie Strike"},         --mez37
         {level = 15, name = "Kelin's Lucid Lullaby"}            --mez30
-
-  
     },
     Slow = {
         {level = 51, name = "Largo's Assonant Binding"},        --slow/snare/-agi
@@ -47,6 +42,9 @@ local spells = {
     },
     ReduceHate = {
         {level = 53, name = "Song of Dawn"}                     --reducehate
+    },
+    WaterBreathing = {
+        {level = 16, name = "Tarew's Aquatic Ayre"}                     --waterbreathing
     }
 }
 
@@ -71,6 +69,9 @@ end
 function spells.loadDefaultSpells(charLevel)
     local defaultSpells = {}
 
+    if gui.singwaterbreathing and charLevel >= 16 then
+        defaultSpells[1] = spells.findBestSpell("WaterBreathing", charLevel)
+    end
     if gui.meleeGroup and charLevel >= 10 then
         defaultSpells[2] = spells.findBestSpell("Haste", charLevel)
     end

@@ -32,6 +32,7 @@ local function setDefaultConfig()
     gui.meleeGroup = true
     gui.casterGroup = false
     gui.singRunSpeed = true
+    gui.singwaterbreathing = false
     gui.singMagicResist = true
     gui.singFireColdResist = false
     gui.singDiseasePoisonResist = false
@@ -286,6 +287,12 @@ local function controlGUI()
         if gui.singSongs then
 
             gui.singRunSpeed = ImGui.Checkbox("Run Speed", gui.singRunSpeed or false)
+
+            ImGui.Spacing()
+            ImGui.Separator()
+            ImGui.Spacing()
+
+            gui.singwaterbreathing = ImGui.Checkbox("Water Breathing", gui.singwaterbreathing or false)
 
             ImGui.Spacing()
             ImGui.Separator()
