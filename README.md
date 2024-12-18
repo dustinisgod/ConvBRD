@@ -73,6 +73,10 @@ These commands control combat behaviors, including melee assistance and target p
 ## Pulling and Mob Control
 These commands manage mob pulling, setting levels, distances, and mob retention in the camp area.
 
+### Toggle Pulling
+- Command: `/ConvBRD Pull on/off`
+- Description: Enables or disables pulling behavior.
+
 ### Pull Direction
 - Command: `/ConvBRD PullNorth/PullEast/PullSouth/PullWest On/Off`
 - Description: Defines the direction to pull from.
